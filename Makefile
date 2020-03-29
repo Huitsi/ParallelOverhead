@@ -6,7 +6,7 @@ SRC = $(shell find ./src/ -type f)
 .PHONY: all clean
 
 parallel_overhead: $(SRC)
-	gcc -lSDL2 -lGL -o $@ $^
+	gcc -Wall -lSDL2 -lGL -o $@ $^
 
 all: parallel_overhead
 
