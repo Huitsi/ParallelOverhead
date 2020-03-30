@@ -5,7 +5,25 @@
 
 State game(SDL_Window *window)
 {
-	GLfloat vertices[] = {0,1,0, 0.5*PI,1,0, 0,0,0};
+	int sectors = 8;
+	float sector_angle = 2*PI/sectors;
+	float corner_angles[sectors];
+	for (int i = 0; i < sectors; i++)
+	{
+		corner_angles[i] = i*sector_angle;
+	}
+
+	GLfloat vertices[2*3*(sectors+1)];
+	for (int i = 0; i <= sectors; i++)
+	{
+		vertices[i*6+0] = corner_angles[i];
+		vertices[i*6+1] = 1;
+		vertices[i*6+2] = 1;
+
+		vertices[i*6+3] = corner_angles[i];
+		vertices[i*6+4] = 1;
+		vertices[i*6+5] = .02;
+	}
 
 	glClearColor(0,0,0,1);
 
@@ -42,7 +60,7 @@ State game(SDL_Window *window)
 		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
-		glDrawArrays(GL_TRIANGLES, 0, 9);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertices)/3);
 		glDisableVertexAttribArray(0);
 
 		if (report_GL_errors("game"))

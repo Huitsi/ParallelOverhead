@@ -11,6 +11,6 @@ void main()
 	float radius = vertex_pos_polar.y + object_pos_polar.y;
 	float depth = vertex_pos_polar.z + object_pos_polar.z;
 
-	gl_Position = vec4(cos(angle)*radius, sin(angle)*radius, depth, 1.0);
+	gl_Position = vec4(cos(angle)*radius, sin(angle)*radius, depth, 1.0/depth);
 	fragment_pos_polar = vertex_pos_polar;
 }

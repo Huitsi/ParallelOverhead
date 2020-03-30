@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 precision mediump float;
-layout(location = 2) in vec3 fragment_pos_polar;
-layout(location = 0) out vec4 color;
+in vec3 fragment_pos_polar;
+out vec4 color;
 void main()
 {
-	color = vec4(1.0,0.0,0.0,1.0);
+	color = vec4(1.0,fragment_pos_polar.x/6.28,fragment_pos_polar.z,1.0);
 }
