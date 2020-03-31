@@ -16,13 +16,13 @@ State game(SDL_Window *window)
 	GLfloat vertices[2*3*(sectors+1)];
 	for (int i = 0; i <= sectors; i++)
 	{
-		vertices[i*6+0] = corner_angles[i];
-		vertices[i*6+1] = 1;
-		vertices[i*6+2] = 1;
+		vertices[i*6+0] = 1;
+		vertices[i*6+1] = corner_angles[i];
+		vertices[i*6+2] = 0;
 
-		vertices[i*6+3] = corner_angles[i];
-		vertices[i*6+4] = 1;
-		vertices[i*6+5] = .02;
+		vertices[i*6+3] = 1;
+		vertices[i*6+4] = corner_angles[i];
+		vertices[i*6+5] = 10;
 	}
 
 	glClearColor(0,0,0,1);
@@ -32,6 +32,19 @@ State game(SDL_Window *window)
 	glBindBuffer(GL_ARRAY_BUFFER, vbuf);
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	int w,h;
+	SDL_GetWindowSize(window, &w, &h);
+	glUniform2f(1,w,h);
+
+	glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	//glDisableVertexAttribArray(0);
+
+	if (report_GL_errors("game"))
+	{
+		return STATE_ERROR;
+	}
 
 	while (1)
 	{
@@ -44,7 +57,10 @@ State game(SDL_Window *window)
 				case SDL_QUIT:
 					return STATE_QUIT;
 				case SDL_WINDOWEVENT:
-					//TODO
+					//Window resize
+					SDL_GetWindowSize(window, &w, &h);
+					glUniform2f(1,w,h);
+					glViewport(0,0,w,h);
 					break;
 				case SDL_KEYDOWN:
 					//TODO
@@ -55,19 +71,8 @@ State game(SDL_Window *window)
 			}
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(0);
-
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertices)/3);
-		glDisableVertexAttribArray(0);
-
-		if (report_GL_errors("game"))
-		{
-			return STATE_ERROR;
-		}
-
 		SDL_GL_SwapWindow(window);
 	}
 

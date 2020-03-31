@@ -7,5 +7,5 @@ in vec3 fragment_pos_polar;
 out vec4 color;
 void main()
 {
-	color = vec4(1.0,fragment_pos_polar.x/6.28,fragment_pos_polar.z,1.0);
+	color = vec4(fragment_pos_polar.x,fragment_pos_polar.y/6.28,fragment_pos_polar.z,1.0);
 }
