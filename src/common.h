@@ -6,8 +6,6 @@
 
 #define VERSION "0.1"
 
-#define PI 3.14159265358979323846
-
 typedef enum
 {
 	STATE_GAME,
