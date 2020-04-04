@@ -13,6 +13,15 @@ typedef enum
 	STATE_ERROR,
 } State;
 
+typedef struct
+{
+	int rings;
+	int sectors;
+
+	int max_color_length;
+	int min_color_length;
+} Settings;
+
 State game(SDL_Window *window);
 
 int report_GL_errors(char *context);

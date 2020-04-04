@@ -3,16 +3,112 @@
  */
 #include "common.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 #define LOC_WH 0
 #define LOC_POS 1
 #define LOC_RINGS 3
 #define PI 3.14159265358979323846
 
+/**
+ * @return A random number in the range [0,1]
+ */
+float ranf()
+{
+	return rand() / (float) RAND_MAX;
+}
+
+/**
+ * @return A random number in the range [min,max]
+ */
+float ranfi(float min, float max)
+{
+	return min + ranf() * ( max - min );
+}
+
+/**
+ * @return A random integer in the range [min,max]
+ */
+int rani(int min, int max)
+{
+	return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+}
+
+/**
+ * Shuffle an array of floats.
+ * @param array The array to shuffle
+ * @param len The length of the array
+ */
+void shufflef(float *array, int len)
+{
+	for (int i = 0; i < len; i++)
+	{
+		int j = rani(0,i);
+		float tmp = array[i];
+		array[i] = array[j];
+		array[j] = tmp;
+	}
+}
+
+/**
+ * Add a section of rings to the given texture array.
+ * @param colors The texture array to add the rings to
+ * @param settings Game settings
+ * @param has_prev_ring Whether there is at least one previous ring in the array in "negative indices"
+ * @return The amount of rings added
+ */
+int generate_rings(float *colors, Settings settings, int has_prev_ring)
+{
+	int length = rani(settings.min_color_length, settings.max_color_length);
+	float color[3];
+	float next_color[] = {0, ranf(), 1};
+	shufflef(next_color, 3);
+
+	if (has_prev_ring)
+	{
+		memcpy(color, &colors[-4], 3);
+	}
+	else
+	{
+		color[0] = 0;
+		color[1] = 1;
+		color[2] = ranf();
+		shufflef(color, 3);
+	}
+
+	float rstep = (next_color[0] - color[0]) / length;
+	float gstep = (next_color[1] - color[1]) / length;
+	float bstep = (next_color[2] - color[2]) / length;
+
+	for (int r = 0; r < length; r++)
+	{
+		color[0] += rstep;
+		color[1] += gstep;
+		color[2] += bstep;
+		for (int s = 0; s < settings.sectors; s++)
+		{
+			float brightness = ranfi(0.5,1);
+
+			colors[(r*settings.sectors + s)*4 + 0] = color[0];
+			colors[(r*settings.sectors + s)*4 + 1] = color[1];
+			colors[(r*settings.sectors + s)*4 + 2] = color[2];
+			colors[(r*settings.sectors + s)*4 + 3] = brightness;
+		}
+	}
+	return length;
+}
+
 State game(SDL_Window *window)
 {
-	int rings = 2;
+	Settings settings;
+	settings.rings = 100;
+	settings.sectors = 8;
+	settings.min_color_length = 5;
+	settings.max_color_length = 20;
 
-	int sectors = 6;
+	int rings = settings.rings;
+	int sectors = settings.sectors;
 	float sector_angle = 2*PI/sectors;
 
 	//Wall vertices
@@ -43,9 +139,15 @@ State game(SDL_Window *window)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
-	//TODO Move to loop
-	float texdata[] = {1,0,0, 0,1,0, 0,0,1, 1,1,0, 0,1,1, 1,0,1,  .75,0,0, 0,.75,0, 0,0,.75, .75,.75,0, 0,.75,.75, .75,0,.75};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, sectors, rings, 0, GL_RGB, GL_FLOAT, texdata);
+	//Create wall texture
+	float wall_texture_data[(rings+settings.max_color_length)*sectors*4];
+	int rings_generated = generate_rings(wall_texture_data, settings, 0);;
+	do
+	{
+		rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], settings, 1);
+	}
+	while (rings_generated < rings);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 
 	glClearColor(0,0,0,1);
 	glUniform1f(LOC_RINGS,rings);

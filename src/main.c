@@ -264,6 +264,8 @@ int main(int argc, char **argv)
 		return 52;
 	}
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	State state = STATE_GAME;
 	while (state != STATE_QUIT && state != STATE_ERROR)
