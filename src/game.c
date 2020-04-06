@@ -54,20 +54,18 @@ void shufflef(float *array, int len)
 /**
  * Add a section of rings to the given texture array.
  * @param colors The texture array to add the rings to
+ * @param prev_color Previous color to transition from, or NULL if none
  * @param settings Game settings
- * @param has_prev_ring Whether there is at least one previous ring in the array in "negative indices"
  * @return The amount of rings added
  */
-int generate_rings(float *colors, Settings settings, int has_prev_ring)
+int generate_rings(float *colors, float* prev_color, Settings settings)
 {
-	int length = rani(settings.min_color_length, settings.max_color_length);
-	float color[3];
-	float next_color[] = {0, ranf(), 1};
-	shufflef(next_color, 3);
+	int length = rani(settings.min_color_transition_length, settings.max_color_transition_length);
 
-	if (has_prev_ring)
+	float color[3];
+	if (prev_color)
 	{
-		memcpy(color, &colors[-4], 3);
+		memcpy(color, prev_color, 3*sizeof(float));
 	}
 	else
 	{
@@ -76,6 +74,9 @@ int generate_rings(float *colors, Settings settings, int has_prev_ring)
 		color[2] = ranf();
 		shufflef(color, 3);
 	}
+
+	float next_color[] = {0, ranf(), 1};
+	shufflef(next_color, 3);
 
 	float rstep = (next_color[0] - color[0]) / length;
 	float gstep = (next_color[1] - color[1]) / length;
@@ -103,9 +104,11 @@ State game(SDL_Window *window)
 {
 	Settings settings;
 	settings.rings = 100;
-	settings.sectors = 8;
-	settings.min_color_length = 5;
-	settings.max_color_length = 20;
+	settings.sectors = 10;
+	settings.min_color_transition_length = 10;
+	settings.max_color_transition_length = 40;
+	settings.min_tick_time = 16;
+	settings.max_tick_time = 24;
 
 	int rings = settings.rings;
 	int sectors = settings.sectors;
@@ -140,13 +143,12 @@ State game(SDL_Window *window)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
 	//Create wall texture
-	float wall_texture_data[(rings+settings.max_color_length)*sectors*4];
-	int rings_generated = generate_rings(wall_texture_data, settings, 0);;
-	do
+	float wall_texture_data[(rings+settings.max_color_transition_length)*sectors*4*100];
+	int rings_generated = generate_rings(wall_texture_data, NULL, settings);
+	while (rings_generated < rings)
 	{
-		rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], settings, 1);
+		rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4], settings);
 	}
-	while (rings_generated < rings);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 
 	glClearColor(0,0,0,1);
@@ -165,10 +167,24 @@ State game(SDL_Window *window)
 		return STATE_ERROR;
 	}
 
+	float ship_ring = 0;
+
+	unsigned int last_tick_time = 0;
+	float speed = 0.02;//9;
 	while (1)
 	{
-		SDL_Event e;
+		unsigned int  tick_start_time =  SDL_GetTicks();
+		if (last_tick_time > settings.max_tick_time)
+		{
+			last_tick_time = settings.max_tick_time;
+		}
+		else if (last_tick_time < settings.min_tick_time)
+		{
+			SDL_Delay(settings.min_tick_time - last_tick_time);
+			last_tick_time = settings.min_tick_time;
+		}
 
+		SDL_Event e;
 		while (SDL_PollEvent(&e))
 		{
 			switch (e.type)
@@ -190,12 +206,32 @@ State game(SDL_Window *window)
 			}
 		}
 
+		ship_ring += last_tick_time*speed;
+		while(ship_ring > 1)
+		{
+			memmove(wall_texture_data, &wall_texture_data[sectors*4], sizeof(wall_texture_data) - sectors*4*sizeof(float));
+			rings_generated--;
+			ship_ring--;
+
+			while (rings_generated < rings)
+			{
+				rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4], settings);
+			}
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
+		}
+
+
+		glUniform3f(LOC_POS, 0, 0, -ship_ring);
+
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertices)/3);
 		SDL_GL_SwapWindow(window);
+
+		last_tick_time = SDL_GetTicks() - tick_start_time;
 	}
 
-	if (report_GL_errors("game init"))
+	if (report_GL_errors("game"))
 	{
 		return STATE_ERROR;
 	}

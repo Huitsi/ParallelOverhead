@@ -15,11 +15,14 @@ typedef enum
 
 typedef struct
 {
-	int rings;
-	int sectors;
+	unsigned short rings;
+	unsigned short sectors;
 
-	int max_color_length;
-	int min_color_length;
+	unsigned short max_color_transition_length;
+	unsigned short min_color_transition_length;
+
+	unsigned short max_tick_time;
+	unsigned short min_tick_time;
 } Settings;
 
 State game(SDL_Window *window);
