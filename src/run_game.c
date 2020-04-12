@@ -2,54 +2,12 @@
  * SPDX-License-Identifier: MIT
  */
 #include "common.h"
-
-#include <stdlib.h>
-#include <string.h>
+#include "shufflef.h"
 
 #define LOC_WH 0
 #define LOC_POS 1
 #define LOC_RINGS 3
 #define PI 3.14159265358979323846
-
-/**
- * @return A random number in the range [0,1]
- */
-float ranf()
-{
-	return rand() / (float) RAND_MAX;
-}
-
-/**
- * @return A random number in the range [min,max]
- */
-float ranfi(float min, float max)
-{
-	return min + ranf() * ( max - min );
-}
-
-/**
- * @return A random integer in the range [min,max]
- */
-int rani(int min, int max)
-{
-	return min + rand() / (RAND_MAX / (max - min + 1) + 1);
-}
-
-/**
- * Shuffle an array of floats.
- * @param array The array to shuffle
- * @param len The length of the array
- */
-void shufflef(float *array, int len)
-{
-	for (int i = 0; i < len; i++)
-	{
-		int j = rani(0,i);
-		float tmp = array[i];
-		array[i] = array[j];
-		array[j] = tmp;
-	}
-}
 
 /**
  * Add a section of rings to the given texture array.
@@ -100,9 +58,8 @@ int generate_rings(float *colors, float* prev_color, Settings settings)
 	return length;
 }
 
-State game(SDL_Window *window)
+int run_game(Settings settings, SDL_Window *window)
 {
-	Settings settings;
 	settings.rings = 100;
 	settings.sectors = 10;
 	settings.min_color_transition_length = 10;
@@ -164,7 +121,7 @@ State game(SDL_Window *window)
 
 	if (report_GL_errors("game init"))
 	{
-		return STATE_ERROR;
+		return RET_GL_ERR;
 	}
 
 	float ship_ring = 0;
@@ -190,7 +147,7 @@ State game(SDL_Window *window)
 			switch (e.type)
 			{
 				case SDL_QUIT:
-					return STATE_QUIT;
+					return 0;
 				case SDL_WINDOWEVENT:
 					//Window resize
 					SDL_GetWindowSize(window, &w, &h);
@@ -233,7 +190,7 @@ State game(SDL_Window *window)
 
 	if (report_GL_errors("game"))
 	{
-		return STATE_ERROR;
+		return RET_GL_ERR;
 	}
-	return STATE_QUIT;
+	return 0;
 }

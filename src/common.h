@@ -1,17 +1,19 @@
 /* Copyright © 2020 Linus Vanas <linus@vanas.fi>
  * SPDX-License-Identifier: MIT
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <SDL2/SDL.h>
 #include <GLES3/gl32.h>
 
-#define VERSION "0.1"
-
-typedef enum
+enum
 {
-	STATE_GAME,
-	STATE_QUIT,
-	STATE_ERROR,
-} State;
+	RET_NO_ERR,
+	RET_SDL_ERR,
+	RET_GL_ERR
+};
 
 typedef struct
 {
@@ -25,6 +27,8 @@ typedef struct
 	unsigned short min_tick_time;
 } Settings;
 
-State game(SDL_Window *window);
+int run_SDL(Settings settings);
+int run_GL(Settings settings, SDL_Window *window);
+int run_game(Settings settings, SDL_Window *window);
 
 int report_GL_errors(char *context);
