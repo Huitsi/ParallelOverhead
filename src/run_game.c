@@ -6,7 +6,7 @@
 
 #define LOC_WH 0
 #define LOC_POS 1
-#define LOC_RINGS 3
+#define LOC_TEX_AREA 3
 #define PI 3.14159265358979323846
 
 /**
@@ -72,18 +72,35 @@ int run_game(Settings settings, SDL_Window *window)
 	float sector_angle = 2*PI/sectors;
 
 	//Wall vertices
-	GLfloat vertices[2*3*(sectors+1)];
+	const int wall_vertices_start = 3*4;
+	GLfloat vertices[wall_vertices_start + 2*3*(sectors+1)];
+
+	vertices[0] = 1;
+	vertices[2] = 0;
+	vertices[3] = 0;
+
+	vertices[3] = 1;
+	vertices[4] = 0;
+	vertices[5] = 1;
+
+	vertices[6] = 1;
+	vertices[7] = sector_angle;
+	vertices[8] = 0;
+
+	vertices[9] = 1;
+	vertices[10] = sector_angle;
+	vertices[11] = 1;
 	for (int i = 0; i <= sectors; i++)
 	{
 		float angle = i*sector_angle;
 
-		vertices[i*6+0] = 1;
-		vertices[i*6+1] = angle;
-		vertices[i*6+2] = 0;
+		vertices[i*6+0+wall_vertices_start] = 1;
+		vertices[i*6+1+wall_vertices_start] = angle;
+		vertices[i*6+2+wall_vertices_start] = 0;
 
-		vertices[i*6+3] = 1;
-		vertices[i*6+4] = angle;
-		vertices[i*6+5] = rings;
+		vertices[i*6+3+wall_vertices_start] = 1;
+		vertices[i*6+4+wall_vertices_start] = angle;
+		vertices[i*6+5+wall_vertices_start] = rings;
 	}
 
 	GLuint vertex_buffer;
@@ -92,14 +109,16 @@ int run_game(Settings settings, SDL_Window *window)
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	GLuint textures[2];
+	glGenTextures(2, textures);
+	GLuint ship_texture = textures[0];
+	GLuint wall_texture = textures[1];
+
 	//Wall texture
-	GLuint wall_texture;
-	glGenTextures(1, &wall_texture);
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
-	//Create wall texture
 	float wall_texture_data[(rings+settings.max_color_transition_length)*sectors*4*100];
 	int rings_generated = generate_rings(wall_texture_data, NULL, settings);
 	while (rings_generated < rings)
@@ -108,8 +127,19 @@ int run_game(Settings settings, SDL_Window *window)
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 
+	//Ship texture
+	glBindTexture(GL_TEXTURE_2D, ship_texture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+
+	SDL_Surface *ship_surface = SDL_LoadBMP("data/ship.bmp");
+	if (!ship_surface)
+	{
+		return RET_SDL_ERR;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ship_surface->w, ship_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, ship_surface->pixels);
+
 	glClearColor(0,0,0,1);
-	glUniform1f(LOC_RINGS,rings);
 
 	int w,h;
 	SDL_GetWindowSize(window, &w, &h);
@@ -164,6 +194,11 @@ int run_game(Settings settings, SDL_Window *window)
 		}
 
 		ship_ring += last_tick_time*speed;
+
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		//Render walls
+		glBindTexture(GL_TEXTURE_2D, wall_texture);
 		while(ship_ring > 1)
 		{
 			memmove(wall_texture_data, &wall_texture_data[sectors*4], sizeof(wall_texture_data) - sectors*4*sizeof(float));
@@ -178,11 +213,16 @@ int run_game(Settings settings, SDL_Window *window)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 		}
 
-
 		glUniform3f(LOC_POS, 0, 0, -ship_ring);
+		glUniform2f(LOC_TEX_AREA, 2*PI, rings);
+		glDrawArrays(GL_TRIANGLE_STRIP, wall_vertices_start/3, (wall_vertices_start + sizeof(vertices))/3);
 
-		glClear(GL_COLOR_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertices)/3);
+		//Render ships
+		glBindTexture(GL_TEXTURE_2D, ship_texture);
+		glUniform3f(LOC_POS, 0, 0, 1);
+		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, wall_vertices_start/3);
+
 		SDL_GL_SwapWindow(window);
 
 		last_tick_time = SDL_GetTicks() - tick_start_time;
