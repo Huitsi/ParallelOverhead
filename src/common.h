@@ -20,6 +20,9 @@ typedef struct
 	unsigned short rings;
 	unsigned short sectors;
 
+	unsigned short amount_of_ships;
+	unsigned short ships_initial_sector_offset;
+
 	unsigned short max_color_transition_length;
 	unsigned short min_color_transition_length;
 

@@ -62,6 +62,8 @@ int run_game(Settings settings, SDL_Window *window)
 {
 	settings.rings = 100;
 	settings.sectors = 10;
+	settings.amount_of_ships = 2;
+	settings.ships_initial_sector_offset = 2;
 	settings.min_color_transition_length = 10;
 	settings.max_color_transition_length = 40;
 	settings.min_tick_time = 16;
@@ -71,25 +73,38 @@ int run_game(Settings settings, SDL_Window *window)
 	int sectors = settings.sectors;
 	float sector_angle = 2*PI/sectors;
 
+	struct
+	{
+		int alive;
+		int sector;
+	}
+	ships[settings.amount_of_ships];
+	for (int i = 0; i < settings.amount_of_ships; i++)
+	{
+		ships[i].alive = 1;
+		ships[i].sector = settings.ships_initial_sector_offset + i * (sectors / settings.amount_of_ships);
+	}
+
 	//Wall vertices
 	const int wall_vertices_start = 3*4;
 	GLfloat vertices[wall_vertices_start + 2*3*(sectors+1)];
 
 	vertices[0] = 1;
 	vertices[2] = 0;
-	vertices[3] = 0;
+	vertices[3] = (1 - sector_angle)/2;
 
 	vertices[3] = 1;
 	vertices[4] = 0;
-	vertices[5] = 1;
+	vertices[5] = 1 - (1 - sector_angle)/2;
 
 	vertices[6] = 1;
 	vertices[7] = sector_angle;
-	vertices[8] = 0;
+	vertices[8] = (1 - sector_angle)/2;
 
 	vertices[9] = 1;
 	vertices[10] = sector_angle;
-	vertices[11] = 1;
+	vertices[11] = 1 - (1 - sector_angle)/2;
+
 	for (int i = 0; i <= sectors; i++)
 	{
 		float angle = i*sector_angle;
@@ -219,9 +234,16 @@ int run_game(Settings settings, SDL_Window *window)
 
 		//Render ships
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
-		glUniform3f(LOC_POS, 0, 0, 1);
 		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, wall_vertices_start/3);
+
+		for (int i = 0; i < settings.amount_of_ships; i++)
+		{
+			if (ships[i].alive)
+			{
+				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, 1);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, wall_vertices_start/3);
+			}
+		}
 
 		SDL_GL_SwapWindow(window);
 

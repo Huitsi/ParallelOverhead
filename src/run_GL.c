@@ -176,6 +176,11 @@ int run_GL(Settings settings, SDL_Window *window)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
+	if (report_GL_errors("make_program"))
+	{
+		return RET_GL_ERR;
+	}
+
 	int ret = run_game(settings, window);
 
 	glDeleteProgram(program);
