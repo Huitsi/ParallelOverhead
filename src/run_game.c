@@ -186,6 +186,8 @@ int run_game(Settings settings, SDL_Window *window)
 			last_tick_time = settings.min_tick_time;
 		}
 
+		int ship_sector_delta = 0;
+
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
 		{
@@ -199,11 +201,16 @@ int run_game(Settings settings, SDL_Window *window)
 					glUniform2f(LOC_WH,w,h);
 					glViewport(0,0,w,h);
 					break;
-				case SDL_KEYDOWN:
-					//TODO
-					break;
 				case SDL_KEYUP:
-					//TODO
+					switch (e.key.keysym.sym)
+					{
+						case SDLK_RIGHT:
+							ship_sector_delta++;
+							break;
+						case SDLK_LEFT:
+							ship_sector_delta--;
+							break;
+					}
 					break;
 			}
 		}
@@ -212,7 +219,7 @@ int run_game(Settings settings, SDL_Window *window)
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//Render walls
+		//Update and render walls
 		glBindTexture(GL_TEXTURE_2D, wall_texture);
 		while(ship_ring > 1)
 		{
@@ -232,7 +239,7 @@ int run_game(Settings settings, SDL_Window *window)
 		glUniform2f(LOC_TEX_AREA, 2*PI, rings);
 		glDrawArrays(GL_TRIANGLE_STRIP, wall_vertices_start/3, (wall_vertices_start + sizeof(vertices))/3);
 
-		//Render ships
+		//Update and render ships
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
 		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
 
@@ -240,6 +247,8 @@ int run_game(Settings settings, SDL_Window *window)
 		{
 			if (ships[i].alive)
 			{
+				ships[i].sector += ship_sector_delta;
+
 				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, 1);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, wall_vertices_start/3);
 			}
