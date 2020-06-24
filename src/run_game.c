@@ -1,6 +1,8 @@
 /* Copyright © 2020 Linus Vanas <linus@vanas.fi>
  * SPDX-License-Identifier: MIT
  */
+#include <math.h>
+
 #include "common.h"
 #include "shufflef.h"
 
@@ -53,6 +55,10 @@ int generate_rings(float *colors, float* prev_color, Settings settings)
 			colors[(r*settings.sectors + s)*4 + 1] = color[1];
 			colors[(r*settings.sectors + s)*4 + 2] = color[2];
 			colors[(r*settings.sectors + s)*4 + 3] = brightness;
+			if (ranf() <= settings.hole_probability)
+			{
+				colors[(r*settings.sectors + s)*4 + 3] = 0;
+			}
 		}
 	}
 	return length;
@@ -68,6 +74,8 @@ int run_game(Settings settings, SDL_Window *window)
 	settings.max_color_transition_length = 40;
 	settings.min_tick_time = 16;
 	settings.max_tick_time = 24;
+	settings.hole_probability = 0.01;
+	settings.speed_multiplier = 0.000075;
 
 	int rings = settings.rings;
 	int sectors = settings.sectors;
@@ -172,7 +180,7 @@ int run_game(Settings settings, SDL_Window *window)
 	float ship_ring = 0;
 
 	unsigned int last_tick_time = 0;
-	float speed = 0.02;//9;
+	unsigned int time_survived = 0;
 	while (1)
 	{
 		unsigned int  tick_start_time =  SDL_GetTicks();
@@ -185,6 +193,9 @@ int run_game(Settings settings, SDL_Window *window)
 			SDL_Delay(settings.min_tick_time - last_tick_time);
 			last_tick_time = settings.min_tick_time;
 		}
+		time_survived += last_tick_time;
+
+		float speed = sqrt(time_survived)*settings.speed_multiplier;
 
 		int ship_sector_delta = 0;
 
@@ -215,8 +226,6 @@ int run_game(Settings settings, SDL_Window *window)
 			}
 		}
 
-		ship_ring += last_tick_time*speed;
-
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Update and render walls
@@ -240,6 +249,8 @@ int run_game(Settings settings, SDL_Window *window)
 		glDrawArrays(GL_TRIANGLE_STRIP, wall_vertices_start/3, (wall_vertices_start + sizeof(vertices))/3);
 
 		//Update and render ships
+		ship_ring += last_tick_time*speed;
+
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
 		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
 

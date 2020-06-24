@@ -28,6 +28,10 @@ typedef struct
 
 	unsigned short max_tick_time;
 	unsigned short min_tick_time;
+
+	float speed_multiplier;
+
+	float hole_probability;
 } Settings;
 
 int run_SDL(Settings settings);
