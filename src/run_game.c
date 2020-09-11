@@ -254,11 +254,20 @@ int run_game(Settings settings, SDL_Window *window)
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
 		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
 
+		int ships_alive = 0;
 		for (int i = 0; i < settings.amount_of_ships; i++)
 		{
 			if (ships[i].alive)
 			{
 				ships[i].sector += ship_sector_delta;
+
+				if (!wall_texture_data[sectors*4 + ships[i].sector*4 + 3])
+				{
+					ships[i].alive = 0;
+					continue;
+				}
+
+				ships_alive++;
 
 				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, 1);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, wall_vertices_start/3);
@@ -266,6 +275,11 @@ int run_game(Settings settings, SDL_Window *window)
 		}
 
 		SDL_GL_SwapWindow(window);
+
+		if (!ships_alive)
+		{
+			break;
+		}
 
 		last_tick_time = SDL_GetTicks() - tick_start_time;
 	}
