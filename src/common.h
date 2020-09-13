@@ -38,4 +38,8 @@ int run_SDL(Settings settings);
 int run_GL(Settings settings, SDL_Window *window);
 int run_game(Settings settings, SDL_Window *window);
 
+void init_audio();
+void free_audio();
+
+void report_SDL_error(char *context);
 int report_GL_errors(char *context);

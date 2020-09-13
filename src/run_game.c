@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "common.h"
+#include "audio.h"
 #include "shufflef.h"
 
 #define LOC_WH 0
@@ -254,6 +255,11 @@ int run_game(Settings settings, SDL_Window *window)
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
 		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
 
+		if (ship_sector_delta)
+		{
+			play_move_sound();
+		}
+
 		int ships_alive = 0;
 		for (int i = 0; i < settings.amount_of_ships; i++)
 		{
@@ -264,6 +270,7 @@ int run_game(Settings settings, SDL_Window *window)
 				if (!wall_texture_data[sectors*4 + ships[i].sector*4 + 3])
 				{
 					ships[i].alive = 0;
+					play_death_sound();
 					continue;
 				}
 

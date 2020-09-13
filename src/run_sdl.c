@@ -19,7 +19,7 @@ void report_SDL_error(char *context)
  */
 int run_SDL(Settings settings)
 {
-	if (SDL_Init(SDL_INIT_VIDEO))
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
 	{
 		report_SDL_error("SDL_Init");
 		SDL_Quit();
@@ -70,7 +70,11 @@ int run_SDL(Settings settings)
 		return RET_SDL_ERR;
 	}
 
+	init_audio();
+
 	int ret = run_GL(settings, window);
+
+	free_audio();
 
 	SDL_GL_DeleteContext(context);
 	SDL_Quit();
