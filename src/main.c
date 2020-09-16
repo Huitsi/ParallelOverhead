@@ -38,6 +38,5 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	Settings settings;
-	return run_SDL(settings);
+	return run_SDL();
 }

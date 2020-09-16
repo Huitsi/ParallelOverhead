@@ -63,9 +63,12 @@ char *load_file(char *path)
 	char *s = malloc(sizeof (char) * (len+1));
 	if(!fread(s,len,1,f))
 	{
+		fclose(f);
 		perror(path);
 		return NULL;
 	}
+
+	fclose(f);
 
 	//Null-terminate and return the string.
 	s[len] = 0;
@@ -158,9 +161,9 @@ GLuint make_program(char *vertex_shader_file_path, char *fragment_shader_file_pa
 /**
  * Initialize OpenGL and then proceed to the game.
  * Cleanup OpenGL after the game is closed.
- * @param settings Game settings.
+ * @param window The game window.
  */
-int run_GL(Settings settings, SDL_Window *window)
+int run_GL(SDL_Window *window)
 {
 	GLuint program = make_program("data/vertex.glsl", "data/fragment.glsl");
 	if(!program)
@@ -181,7 +184,7 @@ int run_GL(Settings settings, SDL_Window *window)
 		return RET_GL_ERR;
 	}
 
-	int ret = run_game(settings, window);
+	int ret = run_game(window);
 
 	glDeleteProgram(program);
 

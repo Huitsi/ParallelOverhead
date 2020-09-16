@@ -12,6 +12,8 @@
 #define LOC_TEX_AREA 3
 #define PI 3.14159265358979323846
 
+#define settings Settings
+
 /**
  * Add a section of rings to the given texture array.
  * @param colors The texture array to add the rings to
@@ -19,7 +21,7 @@
  * @param settings Game settings
  * @return The amount of rings added
  */
-int generate_rings(float *colors, float* prev_color, Settings settings)
+int generate_rings(float *colors, float* prev_color)
 {
 	int length = rani(settings.min_color_transition_length, settings.max_color_transition_length);
 
@@ -65,7 +67,7 @@ int generate_rings(float *colors, float* prev_color, Settings settings)
 	return length;
 }
 
-int run_game(Settings settings, SDL_Window *window)
+int run_game(SDL_Window *window)
 {
 	settings.rings = 100;
 	settings.sectors = 10;
@@ -144,10 +146,10 @@ int run_game(Settings settings, SDL_Window *window)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
 	float wall_texture_data[(rings+settings.max_color_transition_length)*sectors*4*100];
-	int rings_generated = generate_rings(wall_texture_data, NULL, settings);
+	int rings_generated = generate_rings(wall_texture_data, NULL);
 	while (rings_generated < rings)
 	{
-		rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4], settings);
+		rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4]);
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 
@@ -239,7 +241,7 @@ int run_game(Settings settings, SDL_Window *window)
 
 			while (rings_generated < rings)
 			{
-				rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4], settings);
+				rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4]);
 			}
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);

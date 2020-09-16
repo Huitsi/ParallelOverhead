@@ -15,8 +15,10 @@ enum
 	RET_GL_ERR
 };
 
-typedef struct
+struct
 {
+	struct {int x, y, w, h;} window;
+
 	unsigned short rings;
 	unsigned short sectors;
 
@@ -34,9 +36,9 @@ typedef struct
 	float hole_probability;
 } Settings;
 
-int run_SDL(Settings settings);
-int run_GL(Settings settings, SDL_Window *window);
-int run_game(Settings settings, SDL_Window *window);
+int run_SDL();
+int run_GL(SDL_Window *window);
+int run_game(SDL_Window *window);
 
 void init_audio();
 void free_audio();

@@ -1,4 +1,5 @@
 #Copyright © 2020 Linus Vanas <linus@vanas.fi>
 #SPDX-License-Identifier: CC0-1.0
 tmp/**
+*.dat
 parallel_overhead
