@@ -15,30 +15,26 @@ enum
 	RET_GL_ERR
 };
 
+//Global struct for holding various parameters
 struct
 {
+	struct {char mute;} options;
+
 	struct {int x, y, w, h;} window;
 
-	unsigned short rings;
-	unsigned short sectors;
+	struct {unsigned short rings, sectors, ships, start_sector_offset;} game;
 
-	unsigned short amount_of_ships;
-	unsigned short ships_initial_sector_offset;
+	struct {unsigned short min, max;} transitions;
 
-	unsigned short max_color_transition_length;
-	unsigned short min_color_transition_length;
+	struct {float hole_density, speed;} difficulty;
 
-	unsigned short max_tick_time;
-	unsigned short min_tick_time;
+	struct {unsigned short min, max;} tick_time;
+}
+Settings;
 
-	float speed_multiplier;
-
-	float hole_probability;
-} Settings;
-
-int run_SDL();
-int run_GL(SDL_Window *window);
-int run_game(SDL_Window *window);
+int init_SDL();
+int init_GL(SDL_Window *window);
+int init_game(SDL_Window *window);
 
 void init_audio();
 void free_audio();

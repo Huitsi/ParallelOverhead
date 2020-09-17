@@ -17,8 +17,9 @@ int main(int argc, char **argv)
 	int print_help = 0;
 	for (int i = 1; i < argc; i++)
 	{
-		print_version = print_version || !strcmp("--version",argv[i]);
-		print_help = print_help || !strcmp("--help",argv[i]);
+		print_version = print_version || !strcmp("--version", argv[i]);
+		print_help = print_help || !strcmp("--help", argv[i]);
+		Settings.options.mute = Settings.options.mute || !strcmp("--mute", argv[i]);
 	}
 
 	if (print_version)
@@ -31,12 +32,13 @@ int main(int argc, char **argv)
 		printf("Usage: %s [options]\n", argv[0]);
 		printf("Options:\n");
 		printf("\t--help    Print this help and exit.\n");
-		printf("\t--version Print version and exit.\n");
+		printf("\t--version Print the version number and exit.\n");
+		printf("\t--mute    Do not play any audio.\n");
 	}
 	if (print_version || print_help)
 	{
 		return 0;
 	}
 
-	return run_SDL();
+	return init_SDL();
 }

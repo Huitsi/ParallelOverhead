@@ -12,8 +12,6 @@
 #define LOC_TEX_AREA 3
 #define PI 3.14159265358979323846
 
-#define settings Settings
-
 /**
  * Add a section of rings to the given texture array.
  * @param colors The texture array to add the rings to
@@ -23,7 +21,7 @@
  */
 int generate_rings(float *colors, float* prev_color)
 {
-	int length = rani(settings.min_color_transition_length, settings.max_color_transition_length);
+	int length = rani(Settings.transitions.min, Settings.transitions.max);
 
 	float color[3];
 	if (prev_color)
@@ -50,38 +48,42 @@ int generate_rings(float *colors, float* prev_color)
 		color[0] += rstep;
 		color[1] += gstep;
 		color[2] += bstep;
-		for (int s = 0; s < settings.sectors; s++)
+		for (int s = 0; s < Settings.game.sectors; s++)
 		{
 			float brightness = ranfi(0.5,1);
 
-			colors[(r*settings.sectors + s)*4 + 0] = color[0];
-			colors[(r*settings.sectors + s)*4 + 1] = color[1];
-			colors[(r*settings.sectors + s)*4 + 2] = color[2];
-			colors[(r*settings.sectors + s)*4 + 3] = brightness;
-			if (ranf() <= settings.hole_probability)
+			colors[(r * Settings.game.sectors + s) * 4 + 0] = color[0];
+			colors[(r * Settings.game.sectors + s) * 4 + 1] = color[1];
+			colors[(r * Settings.game.sectors + s) * 4 + 2] = color[2];
+			colors[(r * Settings.game.sectors + s) * 4 + 3] = brightness;
+
+			if (ranf() <= Settings.difficulty.hole_density)
 			{
-				colors[(r*settings.sectors + s)*4 + 3] = 0;
+				colors[(r*Settings.game.sectors + s)*4 + 3] = 0;
 			}
 		}
 	}
 	return length;
 }
 
-int run_game(SDL_Window *window)
+int init_game(SDL_Window *window)
 {
-	settings.rings = 100;
-	settings.sectors = 10;
-	settings.amount_of_ships = 2;
-	settings.ships_initial_sector_offset = 2;
-	settings.min_color_transition_length = 10;
-	settings.max_color_transition_length = 40;
-	settings.min_tick_time = 16;
-	settings.max_tick_time = 24;
-	settings.hole_probability = 0.01;
-	settings.speed_multiplier = 0.000075;
+	Settings.tick_time.min = 16;
+	Settings.tick_time.max = 24;
 
-	int rings = settings.rings;
-	int sectors = settings.sectors;
+	Settings.game.rings = 100;
+	Settings.game.sectors = 10;
+	Settings.game.ships = 2;
+	Settings.game.start_sector_offset = 2;
+
+	Settings.transitions.min = 10;
+	Settings.transitions.max = 40;
+
+	Settings.difficulty.hole_density = 0.01;
+	Settings.difficulty.speed = 0.000075;
+
+	int rings = Settings.game.rings;
+	int sectors = Settings.game.sectors;
 	float sector_angle = 2*PI/sectors;
 
 	struct
@@ -89,11 +91,11 @@ int run_game(SDL_Window *window)
 		int alive;
 		int sector;
 	}
-	ships[settings.amount_of_ships];
-	for (int i = 0; i < settings.amount_of_ships; i++)
+	ships[Settings.game.ships];
+	for (int i = 0; i < Settings.game.ships; i++)
 	{
 		ships[i].alive = 1;
-		ships[i].sector = settings.ships_initial_sector_offset + i * (sectors / settings.amount_of_ships);
+		ships[i].sector = Settings.game.start_sector_offset + i * (sectors / Settings.game.ships);
 	}
 
 	//Wall vertices
@@ -145,7 +147,7 @@ int run_game(SDL_Window *window)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
-	float wall_texture_data[(rings+settings.max_color_transition_length)*sectors*4*100];
+	float wall_texture_data[(rings+Settings.transitions.max)*sectors*4*100];
 	int rings_generated = generate_rings(wall_texture_data, NULL);
 	while (rings_generated < rings)
 	{
@@ -187,18 +189,18 @@ int run_game(SDL_Window *window)
 	while (1)
 	{
 		unsigned int  tick_start_time =  SDL_GetTicks();
-		if (last_tick_time > settings.max_tick_time)
+		if (last_tick_time > Settings.tick_time.max)
 		{
-			last_tick_time = settings.max_tick_time;
+			last_tick_time = Settings.tick_time.max;
 		}
-		else if (last_tick_time < settings.min_tick_time)
+		else if (last_tick_time < Settings.tick_time.min)
 		{
-			SDL_Delay(settings.min_tick_time - last_tick_time);
-			last_tick_time = settings.min_tick_time;
+			SDL_Delay(Settings.tick_time.min - last_tick_time);
+			last_tick_time = Settings.tick_time.min;
 		}
 		time_survived += last_tick_time;
 
-		float speed = sqrt(time_survived)*settings.speed_multiplier;
+		float speed = sqrt(time_survived)*Settings.difficulty.speed;
 
 		int ship_sector_delta = 0;
 
@@ -263,7 +265,7 @@ int run_game(SDL_Window *window)
 		}
 
 		int ships_alive = 0;
-		for (int i = 0; i < settings.amount_of_ships; i++)
+		for (int i = 0; i < Settings.game.ships; i++)
 		{
 			if (ships[i].alive)
 			{

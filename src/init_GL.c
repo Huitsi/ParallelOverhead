@@ -88,6 +88,7 @@ GLuint make_shader(char *shader_file_path, GLenum type)
 
 	if (source == NULL)
 	{
+		free(code);
 		return 0;
 	}
 
@@ -112,6 +113,7 @@ GLuint make_shader(char *shader_file_path, GLenum type)
 	report_GL_errors("make_shader");
 	fprintf(stderr, "%s:\n", shader_file_path);
 	fprintf(stderr, log);
+	free(log);
 	return 0;
 }
 
@@ -155,6 +157,7 @@ GLuint make_program(char *vertex_shader_file_path, char *fragment_shader_file_pa
 
 	report_GL_errors("make_program");
 	fprintf(stderr, log);
+	free(log);
 	return 0;
 }
 
@@ -163,7 +166,7 @@ GLuint make_program(char *vertex_shader_file_path, char *fragment_shader_file_pa
  * Cleanup OpenGL after the game is closed.
  * @param window The game window.
  */
-int run_GL(SDL_Window *window)
+int init_GL(SDL_Window *window)
 {
 	GLuint program = make_program("data/vertex.glsl", "data/fragment.glsl");
 	if(!program)
@@ -184,7 +187,7 @@ int run_GL(SDL_Window *window)
 		return RET_GL_ERR;
 	}
 
-	int ret = run_game(window);
+	int ret = init_game(window);
 
 	glDeleteProgram(program);
 

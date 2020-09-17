@@ -61,6 +61,11 @@ void loop_music(void *userdata, unsigned char *stream, int len)
  */
 void init_audio()
 {
+	if (Settings.options.mute)
+	{
+		return;
+	}
+
 	AudioData.music = load_wav("data/fast_pulse.wav");
 	AudioData.move = load_wav("data/move.wav");
 	AudioData.death = load_wav("data/death.wav");
@@ -92,6 +97,11 @@ void init_audio()
  */
 void free_audio()
 {
+	if (Settings.options.mute)
+	{
+		return;
+	}
+
 	SDL_FreeWAV(AudioData.music.buffer);
 	SDL_FreeWAV(AudioData.move.buffer);
 	SDL_FreeWAV(AudioData.death.buffer);
@@ -99,6 +109,11 @@ void free_audio()
 
 void play_move_sound()
 {
+	if (Settings.options.mute)
+	{
+		return;
+	}
+
 	if (AudioData.priority_sound_played && SDL_GetQueuedAudioSize(AudioData.sound_device))
 	{
 		return;
@@ -113,6 +128,11 @@ void play_move_sound()
 
 void play_death_sound()
 {
+	if (Settings.options.mute)
+	{
+		return;
+	}
+
 	SDL_ClearQueuedAudio(AudioData.sound_device);
 	if (SDL_QueueAudio(AudioData.sound_device, AudioData.death.buffer, AudioData.death.length))
 	{

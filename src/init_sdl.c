@@ -69,7 +69,7 @@ void save_window_size(SDL_Window *window)
  * Initialize SDL and then proceed to OpenGL initialization.
  * Cleanup SDL after the game is closed.
  */
-int run_SDL()
+int init_SDL()
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
 	{
@@ -127,13 +127,14 @@ int run_SDL()
 
 	init_audio();
 
-	int ret = run_GL(window);
+	int ret = init_GL(window);
 
 	save_window_size(window);
 
 	free_audio();
 
 	SDL_GL_DeleteContext(context);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 
 	return ret;
