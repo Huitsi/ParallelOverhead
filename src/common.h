@@ -34,6 +34,7 @@ Settings;
 int init_SDL();
 int init_GL(SDL_Window *window);
 int init_game(SDL_Window *window);
+int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[]);
 
 void init_audio();
 void free_audio();

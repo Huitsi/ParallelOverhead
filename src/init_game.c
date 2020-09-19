@@ -5,67 +5,7 @@
 #include <time.h>
 
 #include "common.h"
-#include "audio.h"
-#include "shufflef.h"
-
-#define LOC_WH 0
-#define LOC_POS 1
-#define LOC_TEX_AREA 3
-#define PI 3.14159265358979323846
-
-/**
- * Add a section of rings to the given texture array.
- * @param colors The texture array to add the rings to
- * @param prev_color Previous color to transition from, or NULL if none
- * @param settings Game settings
- * @return The amount of rings added
- */
-int generate_rings(float *colors, float* prev_color)
-{
-	int length = rani(Settings.transitions.min, Settings.transitions.max);
-
-	float color[3];
-	if (prev_color)
-	{
-		memcpy(color, prev_color, 3*sizeof(float));
-	}
-	else
-	{
-		color[0] = 0;
-		color[1] = 1;
-		color[2] = ranf();
-		shufflef(color, 3);
-	}
-
-	float next_color[] = {0, ranf(), 1};
-	shufflef(next_color, 3);
-
-	float rstep = (next_color[0] - color[0]) / length;
-	float gstep = (next_color[1] - color[1]) / length;
-	float bstep = (next_color[2] - color[2]) / length;
-
-	for (int r = 0; r < length; r++)
-	{
-		color[0] += rstep;
-		color[1] += gstep;
-		color[2] += bstep;
-		for (int s = 0; s < Settings.game.sectors; s++)
-		{
-			float brightness = ranfi(0.5,1);
-
-			colors[(r * Settings.game.sectors + s) * 4 + 0] = color[0];
-			colors[(r * Settings.game.sectors + s) * 4 + 1] = color[1];
-			colors[(r * Settings.game.sectors + s) * 4 + 2] = color[2];
-			colors[(r * Settings.game.sectors + s) * 4 + 3] = brightness;
-
-			if (ranf() <= Settings.difficulty.hole_density)
-			{
-				colors[(r*Settings.game.sectors + s)*4 + 3] = 0;
-			}
-		}
-	}
-	return length;
-}
+#include "game.h"
 
 int init_game(SDL_Window *window)
 {
@@ -91,25 +31,9 @@ int init_game(SDL_Window *window)
 	Settings.difficulty.hole_density = 0.01;
 	Settings.difficulty.speed = 0.000075;
 
-	int rings = Settings.game.rings;
-	int sectors = Settings.game.sectors;
-	float sector_angle = 2*PI/sectors;
-
-	struct
-	{
-		int alive;
-		int sector;
-	}
-	ships[Settings.game.ships];
-	for (int i = 0; i < Settings.game.ships; i++)
-	{
-		ships[i].alive = 1;
-		ships[i].sector = Settings.game.start_sector_offset + i * (sectors / Settings.game.ships);
-	}
-
 	//Wall vertices
-	const int wall_vertices_start = 3*4;
-	GLfloat vertices[wall_vertices_start + 2*3*(sectors+1)];
+	float sector_angle = 2*PI/Settings.game.sectors;
+	GLfloat vertices[(4 + 3*Settings.game.sectors + 1)*3];
 
 	vertices[0] = 1;
 	vertices[2] = 0;
@@ -127,17 +51,17 @@ int init_game(SDL_Window *window)
 	vertices[10] = sector_angle;
 	vertices[11] = 1 - (1 - sector_angle)/2;
 
-	for (int i = 0; i <= sectors; i++)
+	for (int i = 0; i <= Settings.game.sectors; i++)
 	{
 		float angle = i*sector_angle;
 
-		vertices[i*6+0+wall_vertices_start] = 1;
-		vertices[i*6+1+wall_vertices_start] = angle;
-		vertices[i*6+2+wall_vertices_start] = 0;
+		vertices[12 + i*6 + 0] = 1;
+		vertices[12 + i*6 + 1] = angle;
+		vertices[12 + i*6 + 2] = 0;
 
-		vertices[i*6+3+wall_vertices_start] = 1;
-		vertices[i*6+4+wall_vertices_start] = angle;
-		vertices[i*6+5+wall_vertices_start] = rings;
+		vertices[12 + i*6 + 3] = 1;
+		vertices[12 + i*6 + 4] = angle;
+		vertices[12 + i*6 + 5] = Settings.game.rings;
 	}
 
 	GLuint vertex_buffer;
@@ -149,20 +73,7 @@ int init_game(SDL_Window *window)
 	GLuint textures[2];
 	glGenTextures(2, textures);
 	GLuint ship_texture = textures[0];
-	GLuint wall_texture = textures[1];
-
-	//Wall texture
-	glBindTexture(GL_TEXTURE_2D, wall_texture);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-
-	float wall_texture_data[(rings+Settings.transitions.max)*sectors*4*100];
-	int rings_generated = generate_rings(wall_texture_data, NULL);
-	while (rings_generated < rings)
-	{
-		rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4]);
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
+	//GLuint wall_texture = textures[1];
 
 	//Ship texture
 	glBindTexture(GL_TEXTURE_2D, ship_texture);
@@ -191,122 +102,5 @@ int init_game(SDL_Window *window)
 		return RET_GL_ERR;
 	}
 
-	float ship_ring = 0;
-
-	unsigned int last_tick_time = 0;
-	unsigned int time_survived = 0;
-	while (1)
-	{
-		unsigned int  tick_start_time =  SDL_GetTicks();
-		if (last_tick_time > Settings.tick_time.max)
-		{
-			last_tick_time = Settings.tick_time.max;
-		}
-		else if (last_tick_time < Settings.tick_time.min)
-		{
-			SDL_Delay(Settings.tick_time.min - last_tick_time);
-			last_tick_time = Settings.tick_time.min;
-		}
-		time_survived += last_tick_time;
-
-		float speed = sqrt(time_survived)*Settings.difficulty.speed;
-
-		int ship_sector_delta = 0;
-
-		SDL_Event e;
-		while (SDL_PollEvent(&e))
-		{
-			switch (e.type)
-			{
-				case SDL_QUIT:
-					return 0;
-				case SDL_WINDOWEVENT:
-					//Window resize
-					SDL_GetWindowSize(window, &w, &h);
-					glUniform2f(LOC_WH,w,h);
-					glViewport(0,0,w,h);
-					break;
-				case SDL_KEYUP:
-					switch (e.key.keysym.sym)
-					{
-						case SDLK_RIGHT:
-							ship_sector_delta++;
-							break;
-						case SDLK_LEFT:
-							ship_sector_delta--;
-							break;
-					}
-					break;
-			}
-		}
-
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		//Update and render walls
-		glBindTexture(GL_TEXTURE_2D, wall_texture);
-		while(ship_ring > 1)
-		{
-			memmove(wall_texture_data, &wall_texture_data[sectors*4], sizeof(wall_texture_data) - sectors*4*sizeof(float));
-			rings_generated--;
-			ship_ring--;
-
-			while (rings_generated < rings)
-			{
-				rings_generated += generate_rings(&wall_texture_data[rings_generated*sectors*4], &wall_texture_data[rings_generated*sectors*4-4]);
-			}
-
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sectors, rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
-		}
-
-		glUniform3f(LOC_POS, 0, 0, -ship_ring);
-		glUniform2f(LOC_TEX_AREA, 2*PI, rings);
-		glDrawArrays(GL_TRIANGLE_STRIP, wall_vertices_start/3, (wall_vertices_start + sizeof(vertices))/3);
-
-		//Update and render ships
-		ship_ring += last_tick_time*speed;
-
-		glBindTexture(GL_TEXTURE_2D, ship_texture);
-		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
-
-		if (ship_sector_delta)
-		{
-			play_move_sound();
-		}
-
-		int ships_alive = 0;
-		for (int i = 0; i < Settings.game.ships; i++)
-		{
-			if (ships[i].alive)
-			{
-				ships[i].sector += ship_sector_delta;
-
-				if (!wall_texture_data[sectors*4 + ships[i].sector*4 + 3])
-				{
-					ships[i].alive = 0;
-					play_death_sound();
-					continue;
-				}
-
-				ships_alive++;
-
-				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, 1);
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, wall_vertices_start/3);
-			}
-		}
-
-		SDL_GL_SwapWindow(window);
-
-		if (!ships_alive)
-		{
-			break;
-		}
-
-		last_tick_time = SDL_GetTicks() - tick_start_time;
-	}
-
-	if (report_GL_errors("game"))
-	{
-		return RET_GL_ERR;
-	}
-	return 0;
+	return run_game(window, vertices, textures);
 }

@@ -88,7 +88,6 @@ void init_audio()
 	}
 
 	SDL_QueueAudio(AudioData.music_device, AudioData.music.buffer, AudioData.music.length);
-	SDL_PauseAudioDevice(AudioData.music_device, 0);
 	SDL_PauseAudioDevice(AudioData.sound_device, 0);
 }
 
@@ -105,6 +104,15 @@ void free_audio()
 	SDL_FreeWAV(AudioData.music.buffer);
 	SDL_FreeWAV(AudioData.move.buffer);
 	SDL_FreeWAV(AudioData.death.buffer);
+}
+
+/**
+ * Pause or unpause the background music.
+ * @param pause Whether to pause (true) or unpause (false) the music
+ */
+void pause_music(char pause)
+{
+	SDL_PauseAudioDevice(AudioData.music_device, pause);
 }
 
 void play_move_sound()
