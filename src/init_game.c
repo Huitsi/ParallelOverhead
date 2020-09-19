@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include <math.h>
+#include <time.h>
 
 #include "common.h"
 #include "audio.h"
@@ -68,6 +69,14 @@ int generate_rings(float *colors, float* prev_color)
 
 int init_game(SDL_Window *window)
 {
+	if (Settings.options.fixed_seed)
+	{
+		srand(Settings.options.seed);
+	}
+	else
+	{
+		srand(time(NULL));
+	}
 	Settings.tick_time.min = 16;
 	Settings.tick_time.max = 24;
 

@@ -3,7 +3,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <SDL2/SDL.h>
 #include <GLES3/gl32.h>
@@ -18,7 +17,7 @@ enum
 //Global struct for holding various parameters
 struct
 {
-	struct {char mute;} options;
+	struct {char mute, fixed_seed; unsigned int seed;} options;
 
 	struct {int x, y, w, h;} window;
 
