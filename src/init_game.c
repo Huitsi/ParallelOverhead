@@ -1,7 +1,6 @@
 /* Copyright © 2020 Linus Vanas <linus@vanas.fi>
  * SPDX-License-Identifier: MIT
  */
-#include <math.h>
 #include <time.h>
 
 #include "common.h"
@@ -9,14 +8,8 @@
 
 int init_game(SDL_Window *window)
 {
-	if (Settings.options.fixed_seed)
-	{
-		srand(Settings.options.seed);
-	}
-	else
-	{
-		srand(time(NULL));
-	}
+	srand(time(NULL));
+
 	Settings.tick_time.min = 16;
 	Settings.tick_time.max = 24;
 
@@ -32,8 +25,8 @@ int init_game(SDL_Window *window)
 	Settings.difficulty.speed = 0.000075;
 
 	//Wall vertices
-	float sector_angle = 2*PI/Settings.game.sectors;
-	GLfloat vertices[(4 + 3*Settings.game.sectors + 1)*3];
+	float sector_angle = FULL_ANGLE/Settings.game.sectors;
+	GLfloat vertices[(4 + 2*Settings.game.sectors + 2)*3];
 
 	vertices[0] = 1;
 	vertices[2] = 0;
@@ -53,15 +46,15 @@ int init_game(SDL_Window *window)
 
 	for (int i = 0; i <= Settings.game.sectors; i++)
 	{
-		float angle = i*sector_angle;
+		int pos = 12 + i * 6;
+		float angle = i * sector_angle;
 
-		vertices[12 + i*6 + 0] = 1;
-		vertices[12 + i*6 + 1] = angle;
-		vertices[12 + i*6 + 2] = 0;
-
-		vertices[12 + i*6 + 3] = 1;
-		vertices[12 + i*6 + 4] = angle;
-		vertices[12 + i*6 + 5] = Settings.game.rings;
+		vertices[pos + 0] = 1;
+		vertices[pos + 1] = angle;
+		vertices[pos + 2] = 0;
+		vertices[pos + 3] = 1;
+		vertices[pos + 4] = angle;
+		vertices[pos + 5] = Settings.game.rings;
 	}
 
 	GLuint vertex_buffer;
@@ -73,7 +66,7 @@ int init_game(SDL_Window *window)
 	GLuint textures[2];
 	glGenTextures(2, textures);
 	GLuint ship_texture = textures[0];
-	//GLuint wall_texture = textures[1];
+	GLuint wall_texture = textures[1];
 
 	//Ship texture
 	glBindTexture(GL_TEXTURE_2D, ship_texture);
@@ -97,10 +90,21 @@ int init_game(SDL_Window *window)
 	glEnableVertexAttribArray(0);
 	//glDisableVertexAttribArray(0);
 
+	//Wall texture
+	glBindTexture(GL_TEXTURE_2D, wall_texture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+
 	if (report_GL_errors("game init"))
 	{
 		return RET_GL_ERR;
 	}
 
-	return run_game(window, vertices, textures);
+	while(run_game(window, vertices, textures));
+
+	if (report_GL_errors("game"))
+	{
+		return RET_GL_ERR;
+	}
+	return 0;
 }

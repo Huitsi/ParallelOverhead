@@ -22,6 +22,7 @@ struct
 	struct audio death;
 
 	char priority_sound_played;
+	int music_place;
 }
 AudioData;
 
@@ -43,17 +44,15 @@ struct audio load_wav(const char* file)
 //SDL_AudioSpec.callback function
 void loop_music(void *userdata, unsigned char *stream, int len)
 {
-	static int place = 0;
-
-	if (place + len < AudioData.music.length)
+	if (AudioData.music_place + len < AudioData.music.length)
 	{
-		memmove(stream, AudioData.music.buffer + place, len);
-		place += len;
+		memmove(stream, AudioData.music.buffer + AudioData.music_place, len);
+		AudioData.music_place += len;
 		return;
 	}
 
-	memmove(stream, AudioData.music.buffer + place, AudioData.music.length - place);
-	place = 0;
+	memmove(stream, AudioData.music.buffer + AudioData.music_place, AudioData.music.length - AudioData.music_place);
+	AudioData.music_place = 0;
 }
 
 /**
@@ -113,6 +112,15 @@ void free_audio()
 void pause_music(char pause)
 {
 	SDL_PauseAudioDevice(AudioData.music_device, pause);
+}
+
+/**
+ * Reset the background music to the beginning and pause it.
+ */
+void reset_music()
+{
+	SDL_PauseAudioDevice(AudioData.music_device, 1);
+	AudioData.music_place = 0;
 }
 
 void play_move_sound()

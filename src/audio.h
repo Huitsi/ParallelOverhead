@@ -3,5 +3,6 @@
  */
 
 void pause_music();
+void reset_music();
 void play_move_sound();
 void play_death_sound();

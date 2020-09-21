@@ -7,9 +7,14 @@
 
 int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 {
+	if (Settings.options.fixed_seed)
+	{
+		srand(Settings.options.seed);
+	}
+
 	GLuint ship_texture = textures[0];
 	GLuint wall_texture = textures[1];
-	const float sector_angle = 2*PI/Settings.game.sectors;
+	const float sector_angle = FULL_ANGLE/Settings.game.sectors;
 	struct
 	{
 		int alive;
@@ -24,17 +29,27 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 
 	//Wall texture
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-
-	float wall_texture_data[(Settings.game.rings + Settings.transitions.max) * Settings.game.sectors*4];
+	float wall_texture_data[(Settings.game.rings + Settings.transitions.max) * Settings.game.sectors * 4];
 	int rings_generated = generate_rings(wall_texture_data, NULL);
-	float ship_ring = 1.001;
+	while (rings_generated < Settings.game.rings)
+	{
+		rings_generated += generate_rings
+		(
+			&wall_texture_data[rings_generated * Settings.game.sectors * 4],
+			&wall_texture_data[rings_generated * Settings.game.sectors * 4 - 4]
+		);
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
+
+	reset_music();
+
+	float ship_ring = 0;
 	unsigned int last_tick_time = 0;
 	unsigned int time_survived = 0;
 	unsigned int rings_survived = 0;
 	unsigned int pauses = 0;
 	char paused = 1;
+
 	while (1)
 	{
 		unsigned int  tick_start_time =  SDL_GetTicks();
@@ -71,11 +86,17 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 						case SDLK_LEFT:
 							ship_sector_delta--;
 							break;
+						case SDLK_BACKSPACE:
+							return 1;
+						case SDLK_RETURN:
 						case SDLK_SPACE:
 							paused = !paused;
 							pauses++;
 							pause_music(paused);
 							break;
+						case SDLK_ESCAPE:
+							return 0;
+
 					}
 					break;
 			}
@@ -122,7 +143,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 		}
 
 		glUniform3f(LOC_POS, 0, 0, -ship_ring);
-		glUniform2f(LOC_TEX_AREA, 2*PI,  Settings.game.rings);
+		glUniform2f(LOC_TEX_AREA, FULL_ANGLE,  Settings.game.rings);
 		glDrawArrays(GL_TRIANGLE_STRIP, 4, 4+1+3*Settings.game.sectors);
 
 		//Update and render ships
@@ -167,9 +188,5 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 
 	printf("Survived for %f s (%u rings). Paused %u times.\n", time_survived/1000., rings_survived, pauses/2);
 
-	if (report_GL_errors("game"))
-	{
-		return RET_GL_ERR;
-	}
-	return 0;
+	return 1;
 }

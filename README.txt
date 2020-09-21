@@ -21,15 +21,17 @@ The executable binary for GNU/Linux systems is called parallel_overhead.
 Parallel Overhead requires the SDL2-library to be installed in the system and
 GLES 3.2 support.
 
-The ships can be rotated clockwise with the left arrow key and anticlockwise
-with the right arrow key. Keep the ships from falling through the holes!
+Keep the ships from falling through the holes! The ships can be rotated
+clockwise with the left arrow key and anticlockwise with the right arrow key.
+The game can be paused/unpaused with space or enter, restarted with backspace
+and exited with escape.
 
-Note that the window can be resized and the music and sound effect volumes can
-be adjusted separately in your OS mixer.
+The game starts paused so that you can resize the window and adjusts the
+(separate) music and sound effect volumes in your OS mixer.
 
 Building
 --------
 Building Parallel Overhead is tested on Debian Buster. The required packages
 are git-lfs (for fetching the audio assets), build-essential and libsdl2-dev.
 After installing the dependencies and cloning the repository, Parallel Overhead
-can be simply built with make.
+can be simply built with "make parallel_overhead".
