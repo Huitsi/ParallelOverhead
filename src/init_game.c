@@ -16,34 +16,38 @@ int init_game(SDL_Window *window)
 	Settings.game.rings = 100;
 	Settings.game.sectors = 10;
 	Settings.game.ships = 2;
-	Settings.game.start_sector_offset = 2;
+	Settings.game.start_sector = 2;
 
 	Settings.transitions.min = 10;
 	Settings.transitions.max = 40;
 
+	Settings.timer.sector = 2;
+	Settings.timer.depth = 3;
+
 	Settings.difficulty.hole_density = 0.01;
 	Settings.difficulty.speed = 0.000075;
 
-	//Wall vertices
 	float sector_angle = FULL_ANGLE/Settings.game.sectors;
 	GLfloat vertices[(4 + 2*Settings.game.sectors + 2)*3];
 
+	//Ship vertices
 	vertices[0] = 1;
 	vertices[2] = 0;
-	vertices[3] = (1 - sector_angle)/2;
+	vertices[3] = 0;
 
 	vertices[3] = 1;
 	vertices[4] = 0;
-	vertices[5] = 1 - (1 - sector_angle)/2;
+	vertices[5] = sector_angle;
 
 	vertices[6] = 1;
 	vertices[7] = sector_angle;
-	vertices[8] = (1 - sector_angle)/2;
+	vertices[8] = 0;
 
 	vertices[9] = 1;
 	vertices[10] = sector_angle;
-	vertices[11] = 1 - (1 - sector_angle)/2;
+	vertices[11] = sector_angle;
 
+	//Wall vertices
 	for (int i = 0; i <= Settings.game.sectors; i++)
 	{
 		int pos = 12 + i * 6;
@@ -63,10 +67,11 @@ int init_game(SDL_Window *window)
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	GLuint textures[2];
-	glGenTextures(2, textures);
+	GLuint textures[3];
+	glGenTextures(3, textures);
 	GLuint ship_texture = textures[0];
 	GLuint wall_texture = textures[1];
+	GLuint timer_texture = textures[2];
 
 	//Ship texture
 	glBindTexture(GL_TEXTURE_2D, ship_texture);
@@ -76,9 +81,17 @@ int init_game(SDL_Window *window)
 	SDL_Surface *ship_surface = SDL_LoadBMP("data/ship.bmp");
 	if (!ship_surface)
 	{
+		report_SDL_error("Loading data/ship.bmp");
 		return RET_SDL_ERR;
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ship_surface->w, ship_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, ship_surface->pixels);
+
+	//Timer
+	load_nums();
+	SDL_Surface *timer_surface = SDL_CreateRGBSurface(0, 7*7+2*3+7*1, 2*11+1, 32, 0, 0, 0, 0);
+	glBindTexture(GL_TEXTURE_2D, timer_texture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
 	glClearColor(0,0,0,1);
 
@@ -100,7 +113,10 @@ int init_game(SDL_Window *window)
 		return RET_GL_ERR;
 	}
 
-	while(run_game(window, vertices, textures));
+	while(run_game(window, vertices, textures, timer_surface));
+
+	free_nums();
+	SDL_FreeSurface(timer_surface);
 
 	if (report_GL_errors("game"))
 	{

@@ -9,4 +9,7 @@
 
 #define FULL_ANGLE 2*M_PI
 
-int generate_rings(float *colors, float* prev_color);
+int generate_rings(float *colors, float *prev_color);
+void load_nums();
+void free_nums();
+void render_time_and_distance(SDL_Surface *target, unsigned int time_ms, unsigned int distance);

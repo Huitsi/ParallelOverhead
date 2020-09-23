@@ -17,13 +17,15 @@ enum
 //Global struct for holding various parameters
 struct
 {
-	struct {char mute, fixed_seed; unsigned int seed;} options;
+	struct {char mute, fixed_seed, hide_counters; unsigned int seed;} options;
 
 	struct {int x, y, w, h;} window;
 
-	struct {unsigned short rings, sectors, ships, start_sector_offset;} game;
+	struct {unsigned short rings, sectors, ships, start_sector;} game;
 
 	struct {unsigned short min, max;} transitions;
+
+	struct {unsigned short sector, depth;} timer;
 
 	struct {float hole_density, speed;} difficulty;
 
@@ -34,7 +36,7 @@ Settings;
 int init_SDL();
 int init_GL(SDL_Window *window);
 int init_game(SDL_Window *window);
-int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[]);
+int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surface *timer_surface);
 
 void init_audio();
 void free_audio();

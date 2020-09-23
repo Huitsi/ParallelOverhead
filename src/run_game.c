@@ -5,7 +5,7 @@
 #include "game.h"
 #include "audio.h"
 
-int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
+int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surface *timer_surface)
 {
 	if (Settings.options.fixed_seed)
 	{
@@ -14,6 +14,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 
 	GLuint ship_texture = textures[0];
 	GLuint wall_texture = textures[1];
+	GLuint timer_texture = textures[2];
 	const float sector_angle = FULL_ANGLE/Settings.game.sectors;
 	struct
 	{
@@ -24,7 +25,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 	for (int i = 0; i < Settings.game.ships; i++)
 	{
 		ships[i].alive = 1;
-		ships[i].sector = Settings.game.start_sector_offset + i * (Settings.game.sectors / Settings.game.ships);
+		ships[i].sector = Settings.game.start_sector + i * (Settings.game.sectors / Settings.game.ships);
 	}
 
 	//Wall texture
@@ -49,6 +50,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 	unsigned int rings_survived = 0;
 	unsigned int pauses = 0;
 	char paused = 1;
+	int ships_alive = 0;
 
 	while (1)
 	{
@@ -86,14 +88,16 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 						case SDLK_LEFT:
 							ship_sector_delta--;
 							break;
-						case SDLK_BACKSPACE:
-							return 1;
 						case SDLK_RETURN:
 						case SDLK_SPACE:
 							paused = !paused;
 							pauses++;
-							pause_music(paused);
-							break;
+							if (ships_alive)
+							{
+								break;
+							}
+						case SDLK_BACKSPACE:
+							return 1;
 						case SDLK_ESCAPE:
 							return 0;
 
@@ -104,14 +108,16 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 
 		float speed = sqrt(time_survived)*Settings.difficulty.speed;
 
-		if (paused)
+		if (paused || !ships_alive)
 		{
-			//ship_sector_delta = 0;
+			ship_sector_delta = 0;
+			pause_music(1);
 		}
 		else
 		{
 			time_survived += last_tick_time;
 			ship_ring += last_tick_time*speed;
+			pause_music(0);
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -148,19 +154,19 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 
 		//Update and render ships
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
-		glUniform2f(LOC_TEX_AREA, sector_angle, 1);
+		glUniform2f(LOC_TEX_AREA, sector_angle, sector_angle);
 
 		if (ship_sector_delta)
 		{
 			play_move_sound();
 		}
 
-		int ships_alive = 0;
+		ships_alive = 0;
 		for (int i = 0; i < Settings.game.ships; i++)
 		{
 			if (ships[i].alive)
 			{
-				ships[i].sector += ship_sector_delta;
+				ships[i].sector = (ships[i].sector + ship_sector_delta) % Settings.game.sectors;
 
 				if (!wall_texture_data[Settings.game.sectors*4 + ships[i].sector*4 + 3])
 				{
@@ -176,12 +182,16 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[])
 			}
 		}
 
-		SDL_GL_SwapWindow(window);
+		//Render timer
+		render_time_and_distance(timer_surface, time_survived, rings_survived);
+		glBindTexture(GL_TEXTURE_2D, timer_texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, timer_surface->w, timer_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, timer_surface->pixels);
 
-		if (!ships_alive)
-		{
-			break;
-		}
+		glUniform3f(LOC_POS, 1, Settings.timer.sector * sector_angle, Settings.timer.depth);
+		glUniform2f(LOC_TEX_AREA, -sector_angle, sector_angle);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		SDL_GL_SwapWindow(window);
 
 		last_tick_time = SDL_GetTicks() - tick_start_time;
 	}
