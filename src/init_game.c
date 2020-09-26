@@ -5,11 +5,10 @@
 
 #include "common.h"
 #include "game.h"
+#include "level.h"
 
 int init_game(SDL_Window *window)
 {
-	srand(time(NULL));
-
 	Settings.tick_time.min = 16;
 	Settings.tick_time.max = 24;
 
@@ -24,8 +23,10 @@ int init_game(SDL_Window *window)
 	Settings.timer.sector = 2;
 	Settings.timer.depth = 3;
 
-	Settings.difficulty.hole_density = 0.01;
 	Settings.difficulty.speed = 0.000075;
+	Settings.difficulty.carvers = 1;
+	Settings.difficulty.transition = 8;
+	Settings.difficulty.uncarved_safe_chance = 0.25;
 
 	float sector_angle = FULL_ANGLE/Settings.game.sectors;
 	GLfloat vertices[(4 + 2*Settings.game.sectors + 2)*3];
@@ -104,6 +105,7 @@ int init_game(SDL_Window *window)
 	//glDisableVertexAttribArray(0);
 
 	//Wall texture
+	init_level();
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -116,6 +118,7 @@ int init_game(SDL_Window *window)
 	while(run_game(window, vertices, textures, timer_surface));
 
 	free_nums();
+	free_level();
 	SDL_FreeSurface(timer_surface);
 
 	if (report_GL_errors("game"))

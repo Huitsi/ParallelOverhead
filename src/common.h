@@ -21,13 +21,13 @@ struct
 
 	struct {int x, y, w, h;} window;
 
-	struct {unsigned short rings, sectors, ships, start_sector;} game;
+	struct {unsigned short rings; unsigned char sectors, ships, start_sector;} game;
 
 	struct {unsigned short min, max;} transitions;
 
 	struct {unsigned short sector, depth;} timer;
 
-	struct {float hole_density, speed;} difficulty;
+	struct {float uncarved_safe_chance, speed; unsigned char carvers, transition;} difficulty;
 
 	struct {unsigned short min, max;} tick_time;
 }

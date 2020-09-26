@@ -4,14 +4,10 @@
 #include "common.h"
 #include "game.h"
 #include "audio.h"
+#include "level.h"
 
 int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surface *timer_surface)
 {
-	if (Settings.options.fixed_seed)
-	{
-		srand(Settings.options.seed);
-	}
-
 	GLuint ship_texture = textures[0];
 	GLuint wall_texture = textures[1];
 	GLuint timer_texture = textures[2];
@@ -28,16 +24,16 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		ships[i].sector = Settings.game.start_sector + i * (Settings.game.sectors / Settings.game.ships);
 	}
 
+	reset_level();
 	//Wall texture
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
 	float wall_texture_data[(Settings.game.rings + Settings.transitions.max) * Settings.game.sectors * 4];
-	int rings_generated = generate_rings(wall_texture_data, NULL);
+	int rings_generated = generate_rings(wall_texture_data);
 	while (rings_generated < Settings.game.rings)
 	{
 		rings_generated += generate_rings
 		(
-			&wall_texture_data[rings_generated * Settings.game.sectors * 4],
-			&wall_texture_data[rings_generated * Settings.game.sectors * 4 - 4]
+			&wall_texture_data[rings_generated * Settings.game.sectors * 4]
 		);
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
@@ -140,8 +136,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 			{
 				rings_generated += generate_rings
 				(
-					&wall_texture_data[rings_generated * Settings.game.sectors * 4],
-					&wall_texture_data[rings_generated * Settings.game.sectors * 4 - 4]
+					&wall_texture_data[rings_generated * Settings.game.sectors * 4]
 				);
 			}
 
@@ -166,7 +161,9 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		{
 			if (ships[i].alive)
 			{
-				ships[i].sector = (ships[i].sector + ship_sector_delta) % Settings.game.sectors;
+				//ships[i].sector = (ships[i].sector + ship_sector_delta) % Settings.game.sectors;
+				ships[i].sector += ship_sector_delta;
+				ships[i].sector %= Settings.game.sectors;
 
 				if (!wall_texture_data[Settings.game.sectors*4 + ships[i].sector*4 + 3])
 				{
