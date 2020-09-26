@@ -10,7 +10,7 @@ struct
 	SDL_Surface *surface;
 	SDL_Rect rects[12];
 }
-TimerData;
+HUD;
 
 /**
  * Format and render the given time to the given surface.
@@ -62,9 +62,9 @@ void render_time(SDL_Surface *target, SDL_Rect rect, unsigned int time_ms)
 	for (int i = cut; i < 9; i++)
 	{
 		unsigned char num = render_nums[i];
-		SDL_BlitSurface(TimerData.surface, &TimerData.rects[num], target, &rect);
-		rect.x += TimerData.rects[num].w + gap;
-		rect.w -= TimerData.rects[num].w + gap;
+		SDL_BlitSurface(HUD.surface, &HUD.rects[num], target, &rect);
+		rect.x += HUD.rects[num].w + gap;
+		rect.w -= HUD.rects[num].w + gap;
 	}
 }
 
@@ -92,13 +92,13 @@ void render_distance(SDL_Surface *target, SDL_Rect rect, unsigned int distance)
 			continue;
 		}
 		leading = 0;
-		SDL_BlitSurface(TimerData.surface, &TimerData.rects[num], target, &rect);
-		rect.x += TimerData.rects[num].w + gap;
-		rect.w -= TimerData.rects[num].w + gap;
+		SDL_BlitSurface(HUD.surface, &HUD.rects[num], target, &rect);
+		rect.x += HUD.rects[num].w + gap;
+		rect.w -= HUD.rects[num].w + gap;
 	}
 
 	unsigned char num = distance % 10;
-	SDL_BlitSurface(TimerData.surface, &TimerData.rects[num], target, &rect);
+	SDL_BlitSurface(HUD.surface, &HUD.rects[num], target, &rect);
 }
 
 /**
@@ -125,15 +125,15 @@ void render_time_and_distance(SDL_Surface *target, unsigned int time_ms, unsigne
 /**
  * Load the number graphics.
  */
-void load_nums()
+void init_hud()
 {
 	if (Settings.options.hide_counters)
 	{
 		return;
 	}
 
-	TimerData.surface = SDL_LoadBMP("data/nums.bmp");
-	if (!TimerData.surface)
+	HUD.surface = SDL_LoadBMP("data/nums.bmp");
+	if (!HUD.surface)
 	{
 		report_SDL_error("Loading data/nums.bmp");
 		//return RET_SDL_ERR;
@@ -147,19 +147,19 @@ void load_nums()
 	{
 		SDL_Rect rect = {x, 0, widths[i], 11};
 		x += rect.w;
-		TimerData.rects[i] = rect;
+		HUD.rects[i] = rect;
 	}
 }
 
 /**
  * Free the memory used by the number graphics.
  */
-void free_nums()
+void free_hud()
 {
 	if (Settings.options.hide_counters)
 	{
 		return;
 	}
 
-	SDL_FreeSurface(TimerData.surface);
+	SDL_FreeSurface(HUD.surface);
 }

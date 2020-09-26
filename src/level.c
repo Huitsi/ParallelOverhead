@@ -115,7 +115,7 @@ void free_level()
 int generate_rings(float *colors)
 {
 	int sectors_per_ship = (Settings.game.sectors / Settings.game.ships);
-	int length = rani(Settings.transitions.min, Settings.transitions.max);
+	int length = rani(Settings.game.color_transitions.min, Settings.game.color_transitions.max);
 
 	float color[3];
 	memcpy(color, Level.previous_color, 3*sizeof(float));

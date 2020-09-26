@@ -5,6 +5,7 @@
 #include "game.h"
 #include "audio.h"
 #include "level.h"
+#include "hud.h"
 
 int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surface *timer_surface)
 {
@@ -27,7 +28,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 	reset_level();
 	//Wall texture
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
-	float wall_texture_data[(Settings.game.rings + Settings.transitions.max) * Settings.game.sectors * 4];
+	float wall_texture_data[(Settings.game.rings + Settings.game.color_transitions.max) * Settings.game.sectors * 4];
 	int rings_generated = generate_rings(wall_texture_data);
 	while (rings_generated < Settings.game.rings)
 	{
@@ -184,7 +185,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		glBindTexture(GL_TEXTURE_2D, timer_texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, timer_surface->w, timer_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, timer_surface->pixels);
 
-		glUniform3f(LOC_POS, 1, Settings.timer.sector * sector_angle, Settings.timer.depth);
+		glUniform3f(LOC_POS, 1, Settings.hud.sector * sector_angle, Settings.hud.depth);
 		glUniform2f(LOC_TEX_AREA, -sector_angle, sector_angle);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

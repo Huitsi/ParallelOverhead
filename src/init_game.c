@@ -6,6 +6,7 @@
 #include "common.h"
 #include "game.h"
 #include "level.h"
+#include "hud.h"
 
 int init_game(SDL_Window *window)
 {
@@ -69,7 +70,7 @@ int init_game(SDL_Window *window)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ship_surface->w, ship_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, ship_surface->pixels);
 
 	//Timer
-	load_nums();
+	init_hud();
 	SDL_Surface *timer_surface = SDL_CreateRGBSurface(0, 7*7+2*3+7*1, 2*11+1, 32, 0, 0, 0, 0);
 	glBindTexture(GL_TEXTURE_2D, timer_texture);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -98,7 +99,7 @@ int init_game(SDL_Window *window)
 
 	while(run_game(window, vertices, textures, timer_surface));
 
-	free_nums();
+	free_hud();
 	free_level();
 	SDL_FreeSurface(timer_surface);
 

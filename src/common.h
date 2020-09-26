@@ -17,17 +17,20 @@ enum
 //Global struct for holding various parameters
 struct settings
 {
-	struct {char mute, fixed_seed, hide_counters; unsigned int seed;} options;
+	struct {char mute:1, fixed_seed:1, hide_counters:1; unsigned int seed;} options;
 
 	struct {int x, y, w, h;} window;
 
-	struct {unsigned short rings; unsigned char sectors, ships, start_sector;} game;
-
-	struct {unsigned short min, max;} transitions;
-
-	struct {unsigned short sector, depth;} timer;
+	struct
+	{
+		unsigned char rings, sectors, ships, start_sector;
+		struct {unsigned char min, max;} color_transitions;
+	}
+	game;
 
 	struct {float uncarved_safe_chance, speed; unsigned char carvers, transition;} difficulty;
+
+	struct {unsigned char sector, depth;} hud;
 
 	struct {unsigned short min, max;} tick_time;
 };
