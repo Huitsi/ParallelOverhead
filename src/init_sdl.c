@@ -18,11 +18,6 @@ void report_SDL_error(char *context)
  */
 void load_window_size()
 {
-	Settings.window.x = SDL_WINDOWPOS_UNDEFINED;
-	Settings.window.y = SDL_WINDOWPOS_UNDEFINED;
-	Settings.window.w = 480;
-	Settings.window.h = 480;
-
 	FILE *f = fopen("window.dat","r");
 	if (f == NULL)
 	{

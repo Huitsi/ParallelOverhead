@@ -15,7 +15,7 @@ enum
 };
 
 //Global struct for holding various parameters
-struct
+struct settings
 {
 	struct {char mute, fixed_seed, hide_counters; unsigned int seed;} options;
 
@@ -30,8 +30,8 @@ struct
 	struct {float uncarved_safe_chance, speed; unsigned char carvers, transition;} difficulty;
 
 	struct {unsigned short min, max;} tick_time;
-}
-Settings;
+};
+extern struct settings Settings;
 
 int init_SDL();
 int init_GL(SDL_Window *window);

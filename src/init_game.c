@@ -9,25 +9,6 @@
 
 int init_game(SDL_Window *window)
 {
-	Settings.tick_time.min = 16;
-	Settings.tick_time.max = 24;
-
-	Settings.game.rings = 100;
-	Settings.game.sectors = 10;
-	Settings.game.ships = 2;
-	Settings.game.start_sector = 2;
-
-	Settings.transitions.min = 10;
-	Settings.transitions.max = 40;
-
-	Settings.timer.sector = 2;
-	Settings.timer.depth = 3;
-
-	Settings.difficulty.speed = 0.000075;
-	Settings.difficulty.carvers = 1;
-	Settings.difficulty.transition = 8;
-	Settings.difficulty.uncarved_safe_chance = 0.25;
-
 	float sector_angle = FULL_ANGLE/Settings.game.sectors;
 	GLfloat vertices[(4 + 2*Settings.game.sectors + 2)*3];
 
