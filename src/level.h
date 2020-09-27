@@ -2,7 +2,9 @@
  * SPDX-License-Identifier: MIT
  */
 void init_level();
-void reset_level();
 void free_level();
+
+void reset_level();
+void increase_difficulty();
 
 int generate_rings(float *colors);

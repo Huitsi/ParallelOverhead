@@ -169,6 +169,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 				if (!wall_texture_data[Settings.game.sectors*4 + ships[i].sector*4 + 3])
 				{
 					ships[i].alive = 0;
+					increase_difficulty();
 					play_death_sound();
 					continue;
 				}

@@ -28,7 +28,17 @@ struct settings
 	}
 	game;
 
-	struct {float uncarved_safe_chance, speed; unsigned char carvers, transition;} difficulty;
+	struct
+	{
+		float uncarved_safe_chance, speed;
+		unsigned char carvers, transition_length;
+		struct
+		{
+			float uncarved_safe_chance, speed;
+			short carvers, transition_length;
+		} increase;
+	}
+	difficulty;
 
 	struct {unsigned char sector, depth;} hud;
 

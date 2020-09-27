@@ -7,8 +7,13 @@
 struct
 {
 	float previous_color[3];
-	unsigned char *carvers;
-	unsigned char *safe_path;
+	unsigned char *carvers, *safe_path, carvers_to_merge;
+	struct
+	{
+		float uncarved_safe_chance;
+		unsigned char carvers, transition_length;
+	}
+	difficulty;
 }
 Level;
 
@@ -65,6 +70,25 @@ void generate_color(float *color)
 }
 
 /**
+ * Initialize the level generator.
+ */
+void init_level()
+{
+	srand(time(NULL));
+	Level.carvers = malloc(Settings.difficulty.carvers);
+	Level.safe_path = malloc(Settings.game.sectors);
+}
+
+/**
+ * Free the memory used by level generation data.
+ */
+void free_level()
+{
+	free(Level.carvers);
+	free(Level.safe_path);
+}
+
+/**
  * Reset the level generator (for starting a new game).
  */
 void reset_level()
@@ -81,30 +105,26 @@ void reset_level()
 		Level.carvers[i] = rani(0, Settings.game.sectors - 1);
 	}
 
+	Level.difficulty.carvers = Settings.difficulty.carvers;
+
+	Level.difficulty.uncarved_safe_chance = Settings.difficulty.uncarved_safe_chance;
+	Level.difficulty.transition_length = Settings.difficulty.transition_length;
+
 	for (int i = 0; i < Settings.game.sectors; i++)
 	{
-		Level.safe_path[i] = Settings.difficulty.transition;
+		Level.safe_path[i] = Level.difficulty.transition_length;
 	}
 }
 
 /**
- * Initialize the level generator.
+ * Increse the difficulty of the generated level by an amount defined in the settings.
  */
-void init_level()
+void increase_difficulty()
 {
-	srand(time(NULL));
-	Level.carvers = malloc(Settings.difficulty.carvers);
-	Level.safe_path = malloc(Settings.game.sectors);
-	reset_level();
-}
+	Level.difficulty.uncarved_safe_chance += Settings.difficulty.increase.uncarved_safe_chance;
+	Level.difficulty.transition_length += Settings.difficulty.increase.transition_length;
 
-/**
- * Free the memory used by level generation data.
- */
-void free_level()
-{
-	free(Level.carvers);
-	free(Level.safe_path);
+	Level.carvers_to_merge -= Settings.difficulty.increase.carvers;
 }
 
 /**
@@ -114,7 +134,9 @@ void free_level()
  */
 int generate_rings(float *colors)
 {
+	int last_carver = Level.difficulty.carvers - 1;
 	int sectors_per_ship = (Settings.game.sectors / Settings.game.ships);
+
 	int length = rani(Settings.game.color_transitions.min, Settings.game.color_transitions.max);
 
 	float color[3];
@@ -128,16 +150,20 @@ int generate_rings(float *colors)
 	float gstep = (next_color[1] - color[1]) / length;
 	float bstep = (next_color[2] - color[2]) / length;
 
+	//For each generated ring
 	for (int r = 0; r < length; r++)
 	{
-		for (int c = 0; c < Settings.difficulty.carvers; c++)
+		//For each active carver
+		for (int c = 0; c < Level.difficulty.carvers; c++)
 		{
+			//Carve a safe path
 			for (int s = 0; s < Settings.game.ships; s++)
 			{
 				int sector = Level.carvers[c] + s * sectors_per_ship;
-				Level.safe_path[sector] = Settings.difficulty.transition + 1;
+				Level.safe_path[sector] = Level.difficulty.transition_length + 1;
 			}
 
+			//Move the carver randomly
 			short sector = (Level.carvers[c] + rani(-1,1)) % sectors_per_ship;
 			if (sector < 0)
 			{
@@ -145,7 +171,12 @@ int generate_rings(float *colors)
 			}
 			Level.carvers[c] = sector;
 
-
+			//Merge the last carver into this one if requested (diffculty increase) and possible (sama place)
+			if (Level.carvers_to_merge && c != last_carver && Level.carvers[c] == Level.carvers[last_carver])
+			{
+				Level.difficulty.carvers--;
+				Level.carvers_to_merge--;
+			}
 		}
 
 		color[0] += rstep;
@@ -160,11 +191,11 @@ int generate_rings(float *colors)
 			colors[pos + 2] = color[2];
 			colors[pos + 3] = ranfi(0.6,1);
 
-			if (Level.safe_path[s] || ranf() < Settings.difficulty.uncarved_safe_chance)
+			if (Level.safe_path[s])
 			{
 				Level.safe_path[s]--;
 			}
-			else
+			else if (ranf() > Level.difficulty.uncarved_safe_chance)
 			{
 				colors[pos + 3] = 0;
 			}
