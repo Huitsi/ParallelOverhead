@@ -13,6 +13,10 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 	GLuint wall_texture = textures[1];
 	GLuint timer_texture = textures[2];
 	const float sector_angle = FULL_ANGLE/Settings.game.sectors;
+
+	reset_level();
+	reset_music();
+
 	struct
 	{
 		int alive;
@@ -25,7 +29,6 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		ships[i].sector = Settings.game.start_sector + i * (Settings.game.sectors / Settings.game.ships);
 	}
 
-	reset_level();
 	//Wall texture
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
 	float wall_texture_data[(Settings.game.rings + Settings.game.color_transitions.max) * Settings.game.sectors * 4];
@@ -39,15 +42,13 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 
-	reset_music();
-
 	float ship_ring = 0;
 	unsigned int last_tick_time = 0;
 	unsigned int time_survived = 0;
 	unsigned int rings_survived = 0;
 	unsigned int pauses = 0;
 	char paused = 1;
-	int ships_alive = 0;
+	int ships_alive = Settings.game.ships;
 
 	while (1)
 	{
@@ -97,7 +98,6 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 							return 1;
 						case SDLK_ESCAPE:
 							return 0;
-
 					}
 					break;
 			}
@@ -162,9 +162,12 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		{
 			if (ships[i].alive)
 			{
-				//ships[i].sector = (ships[i].sector + ship_sector_delta) % Settings.game.sectors;
 				ships[i].sector += ship_sector_delta;
 				ships[i].sector %= Settings.game.sectors;
+				if (ships[i].sector < 0)
+				{
+					ships[i].sector += Settings.game.sectors;
+				}
 
 				if (!wall_texture_data[Settings.game.sectors*4 + ships[i].sector*4 + 3])
 				{

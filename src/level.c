@@ -102,9 +102,10 @@ void reset_level()
 
 	for (int i = 0; i < Settings.difficulty.carvers; i++)
 	{
-		Level.carvers[i] = rani(0, Settings.game.sectors - 1);
+		Level.carvers[i] = rani(0, (Settings.game.sectors / Settings.game.ships) - 1);
 	}
 
+	Level.carvers_to_merge = 0;
 	Level.difficulty.carvers = Settings.difficulty.carvers;
 
 	Level.difficulty.uncarved_safe_chance = Settings.difficulty.uncarved_safe_chance;

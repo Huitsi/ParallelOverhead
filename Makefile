@@ -9,10 +9,10 @@ D = $(patsubst src/%.c, tmp/%.dbg.o, $C)
 .PHONY: all clean
 
 po.debug: $D
-	gcc -lSDL2 -lGL -lm $^ -o $@
+	gcc -lSDL2 -lGLESv2 -lm $^ -o $@
 
 parallel_overhead: $O
-	gcc -lSDL2 -lGL -lm $^ -o $@
+	gcc -lSDL2 -lGLESv2 -lm $^ -o $@
 
 $O: tmp/%.o: src/%.c $H | tmp
 	gcc -O3 -Wall -c $< -o $@
