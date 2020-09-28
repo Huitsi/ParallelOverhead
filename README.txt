@@ -10,16 +10,14 @@ ships Truth and Beauty on a groundbreaking trip through hyperspace. A stable
 hyperspace tunnel is finally being achieved with two ships locked to the
 opposite walls of the tunnel. Well, almost stable...
 
-On the web
-----------
 https://huitsi.net/games/parallel-overhead/
-https://huitsi.net:61734/Huitsi/ParallelOverhead
 
-Gameplay
---------
+Playing the game
+----------------
 The executable binary for GNU/Linux systems is called parallel_overhead.
-Parallel Overhead requires the SDL2-library to be installed in the system and
-GLES 3.2 support.
+Parallel Overhead requires the SDL2-library to be installed in the system as
+well as GLES 3.2 support. Parallel overhead has a few command line options, run
+'parallel_overhead --help' to find out more about them.
 
 Keep the ships from falling through the holes! The ships can be rotated
 clockwise with the left arrow key and anticlockwise with the right arrow key.
@@ -29,9 +27,14 @@ and exited with escape.
 The game starts paused so that you can resize the window and adjusts the
 (separate) music and sound effect volumes in your OS mixer.
 
-Building
---------
+Building from source
+--------------------
+The Parallel Overhead source code can be found at:
+https://huitsi.net:61734/Huitsi/ParallelOverhead
+
+When cloning with git, git-lfs is needed to get the audio assets. Make sure you
+have initialized it with 'git lfs install' before cloning.
+
 Building Parallel Overhead is tested on Debian Buster. The required packages
-are git-lfs (for fetching the audio assets), build-essential and libsdl2-dev.
-After installing the dependencies and cloning the repository, Parallel Overhead
-can be simply built with "make parallel_overhead".
+are build-essential and libsdl2-dev. With those installed Parallel Overhead can
+be simply built with 'make parallel_overhead'.

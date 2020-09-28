@@ -5,7 +5,7 @@
 
 #include "common.h"
 
-#define VERSION "0.1"
+#define VERSION "1.0.0"
 
 /**
  * Parse arguments and proceed to SDL initialization.
