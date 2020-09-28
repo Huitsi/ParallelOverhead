@@ -46,9 +46,13 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 	unsigned int last_tick_time = 0;
 	unsigned int time_survived = 0;
 	unsigned int rings_survived = 0;
-	unsigned int pauses = 0;
 	char paused = 1;
 	int ships_alive = Settings.game.ships;
+
+	if (!Settings.options.quiet)
+	{
+		printf("Starting a new run.\n");
+	}
 
 	while (1)
 	{
@@ -89,7 +93,6 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 						case SDLK_RETURN:
 						case SDLK_SPACE:
 							paused = !paused;
-							pauses++;
 							if (ships_alive)
 							{
 								break;
@@ -174,6 +177,10 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 					ships[i].alive = 0;
 					increase_difficulty();
 					play_death_sound();
+					if (!Settings.options.quiet)
+					{
+						printf("Ship lost after %.3f s (a distance of %u rings).\n", time_survived/1000., rings_survived);
+					}
 					continue;
 				}
 
@@ -197,8 +204,6 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 		last_tick_time = SDL_GetTicks() - tick_start_time;
 	}
-
-	printf("Survived for %f s (%u rings). Paused %u times.\n", time_survived/1000., rings_survived, pauses/2);
 
 	return 1;
 }

@@ -17,7 +17,7 @@ enum
 //Global struct for holding various parameters
 struct settings
 {
-	struct {char mute:1, fixed_seed:1, hide_counters:1; unsigned int seed;} options;
+	struct {char mute:1, quiet:1, hide_counters:1, fixed_seed:1; unsigned int seed;} options;
 
 	struct {int x, y, w, h;} window;
 

@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 		print_version = print_version || !strcmp("--version", argv[i]);
 		print_help = print_help || !strcmp("--help", argv[i]);
 		Settings.options.mute = Settings.options.mute || !strcmp("--mute", argv[i]);
+		Settings.options.quiet = Settings.options.quiet || !strcmp("--quiet", argv[i]);
 		Settings.options.hide_counters = Settings.options.hide_counters || !strcmp("--hide-counters", argv[i]);
 	}
 
@@ -52,6 +53,7 @@ int main(int argc, char **argv)
 		printf("\t--help          Print this help and exit.\n");
 		printf("\t--version       Print the version number and exit.\n");
 		printf("\t--mute          Do not play any audio.\n");
+		printf("\t--quiet         Do not print results into standard output.\n");
 		printf("\t--hide-counters Do not display time and distance counters.\n");
 		printf("\t--seed <seed>   Set the level generator seed to <seed>, a non-negative integer.\n");
 	}
