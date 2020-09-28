@@ -33,7 +33,20 @@ int main(int argc, char **argv)
 				Settings.options.fixed_seed = 0;
 				fprintf(stderr, "Invalid seed: %s\n", argv[i]);
 			}
+			continue;
 		}
+
+		if (!strcmp("--override-params", argv[i]))
+		{
+			if (++i >= argc)
+			{
+				fprintf(stderr, "No file provided\n");
+				break;
+			}
+			override_params(argv[i]);
+			continue;
+		}
+
 		print_version = print_version || !strcmp("--version", argv[i]);
 		print_help = print_help || !strcmp("--help", argv[i]);
 		Settings.options.mute = Settings.options.mute || !strcmp("--mute", argv[i]);
@@ -45,17 +58,19 @@ int main(int argc, char **argv)
 	{
 		printf("Parallel Overhead %s\n", VERSION);
 	}
+
 	if (print_help)
 	{
 		printf("An endless runner game.\n");
 		printf("Usage: %s [options]\n", argv[0]);
 		printf("Options:\n");
-		printf("\t--help          Print this help and exit.\n");
-		printf("\t--version       Print the version number and exit.\n");
-		printf("\t--mute          Do not play any audio.\n");
-		printf("\t--quiet         Do not print results into standard output.\n");
-		printf("\t--hide-counters Do not display time and distance counters.\n");
-		printf("\t--seed <seed>   Set the level generator seed to <seed>, a non-negative integer.\n");
+		printf(" --help                   Print this help and exit.\n");
+		printf(" --version                Print the version number and exit.\n");
+		printf(" --mute                   Do not play any audio.\n");
+		printf(" --quiet                  Do not print results into standard output.\n");
+		printf(" --hide-counters          Do not display time and distance counters.\n");
+		printf(" --seed <seed>            Set the level generator seed to <seed>, a non-negative integer.\n");
+		printf(" --override-params <file> Override the game parameters with the ones from <file>.\n");
 	}
 	if (print_version || print_help)
 	{

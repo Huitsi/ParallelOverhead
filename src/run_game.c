@@ -172,7 +172,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 					ships[i].sector += Settings.game.sectors;
 				}
 
-				if (!wall_texture_data[Settings.game.sectors*4 + ships[i].sector*4 + 3])
+				if (!wall_texture_data[Settings.game.sectors*4*Settings.game.ship_depth + ships[i].sector*4 + 3])
 				{
 					ships[i].alive = 0;
 					increase_difficulty();
@@ -186,7 +186,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 				ships_alive++;
 
-				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, 1);
+				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, Settings.game.ship_depth);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			}
 		}

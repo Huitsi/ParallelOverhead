@@ -23,14 +23,14 @@ struct settings
 
 	struct
 	{
-		unsigned char rings, sectors, ships, start_sector;
+		unsigned char rings, sectors, ships, ship_depth, start_sector;
 		struct {unsigned char min, max;} color_transitions;
 	}
 	game;
 
 	struct
 	{
-		float uncarved_safe_chance, speed;
+		float speed, uncarved_safe_chance;
 		unsigned char carvers, transition_length;
 		struct
 		{
@@ -42,7 +42,7 @@ struct settings
 
 	struct {unsigned char sector, depth;} hud;
 
-	struct {unsigned short min, max;} tick_time;
+	struct {unsigned char min, max;} tick_time;
 };
 extern struct settings Settings;
 
@@ -50,6 +50,8 @@ int init_SDL();
 int init_GL(SDL_Window *window);
 int init_game(SDL_Window *window);
 int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surface *timer_surface);
+
+void override_params(char *file);
 
 void init_audio();
 void free_audio();
