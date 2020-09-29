@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 
 WARNING: This game features rapidly changing colors.
 
-Parallel Overhead is an endless runner game, where you take control of the
+Parallel Overhead is an endless runner game where you take control of the
 ships Truth and Beauty on a groundbreaking trip through hyperspace. A stable
 hyperspace tunnel is finally being achieved with two ships locked to the
 opposite walls of the tunnel. Well, almost stable...
@@ -16,8 +16,8 @@ Playing the game
 ----------------
 The executable binary for GNU/Linux systems is called parallel_overhead.
 Parallel Overhead requires the SDL2-library to be installed in the system as
-well as GLES 3.2 support. Parallel overhead has a few command line options, run
-'parallel_overhead --help' to find out more about them.
+well as GLES 2.0 support. Parallel overhead has a few command line options, run
+'./parallel_overhead --help' to find out more about them.
 
 Keep the ships from falling through the holes! The ships can be rotated
 clockwise with the left arrow key and anticlockwise with the right arrow key.
@@ -31,6 +31,7 @@ Building from source
 --------------------
 The Parallel Overhead source code can be found at:
 https://huitsi.net:61734/Huitsi/ParallelOverhead
+https://github.com/Huitsi/ParallelOverhead
 
 When cloning with git, git-lfs is needed to get the audio assets. Make sure you
 have initialized it with 'git lfs install' before cloning.
