@@ -3,8 +3,10 @@
  */
 #include <math.h>
 
-#define LOC_WH 0
-#define LOC_POS 1
-#define LOC_TEX_AREA 3
-
 #define FULL_ANGLE 2*M_PI
+
+extern struct
+{
+	int vertex_pos_polar, screen_wh, object_pos_polar, texture_area;
+}
+Locs;

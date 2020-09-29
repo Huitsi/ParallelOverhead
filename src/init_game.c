@@ -80,11 +80,10 @@ int init_game(SDL_Window *window)
 
 	int w,h;
 	SDL_GetWindowSize(window, &w, &h);
-	glUniform2f(LOC_WH,w,h);
+	glUniform2f(Locs.screen_wh, w, h);
 
-	glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-	//glDisableVertexAttribArray(0);
+	glVertexAttribPointer(Locs.vertex_pos_polar, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(Locs.vertex_pos_polar);
 
 	//Wall texture
 	init_level();

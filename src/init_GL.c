@@ -161,6 +161,12 @@ GLuint make_program(char *vertex_shader_file_path, char *fragment_shader_file_pa
 	return 0;
 }
 
+struct
+{
+	GLint vertex_pos_polar, screen_wh, object_pos_polar, texture_area;
+}
+Locs;
+
 /**
  * Initialize OpenGL and then proceed to the game.
  * Cleanup OpenGL after the game is closed.
@@ -182,10 +188,15 @@ int init_GL(SDL_Window *window)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	if (report_GL_errors("make_program"))
+	if (report_GL_errors("eanble blend"))
 	{
 		return RET_GL_ERR;
 	}
+
+	Locs.vertex_pos_polar = glGetAttribLocation(program, "vertex_pos_polar");
+	Locs.screen_wh = glGetUniformLocation(program, "screen_wh");
+	Locs.object_pos_polar = glGetUniformLocation(program, "object_pos_polar");
+	Locs.texture_area = glGetUniformLocation(program, "texture_area");
 
 	int ret = init_game(window);
 

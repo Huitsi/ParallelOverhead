@@ -78,7 +78,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 				case SDL_WINDOWEVENT:
 					//Window resize
 					SDL_GetWindowSize(window, &w, &h);
-					glUniform2f(LOC_WH,w,h);
+					glUniform2f(Locs.screen_wh, w, h);
 					glViewport(0,0,w,h);
 					break;
 				case SDL_KEYUP:
@@ -147,13 +147,13 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
 		}
 
-		glUniform3f(LOC_POS, 0, 0, -ship_ring);
-		glUniform2f(LOC_TEX_AREA, FULL_ANGLE,  Settings.game.rings);
+		glUniform3f(Locs.object_pos_polar, 0, 0, -ship_ring);
+		glUniform2f(Locs.texture_area, FULL_ANGLE,  Settings.game.rings);
 		glDrawArrays(GL_TRIANGLE_STRIP, 4, 4+1+3*Settings.game.sectors);
 
 		//Update and render ships
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
-		glUniform2f(LOC_TEX_AREA, sector_angle, sector_angle);
+		glUniform2f(Locs.texture_area, sector_angle, sector_angle);
 
 		if (ship_sector_delta)
 		{
@@ -186,7 +186,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 				ships_alive++;
 
-				glUniform3f(LOC_POS, 0, ships[i].sector * sector_angle, Settings.game.ship_depth);
+				glUniform3f(Locs.object_pos_polar, 0, ships[i].sector * sector_angle, Settings.game.ship_depth);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			}
 		}
@@ -196,8 +196,8 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		glBindTexture(GL_TEXTURE_2D, timer_texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, timer_surface->w, timer_surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, timer_surface->pixels);
 
-		glUniform3f(LOC_POS, 1, Settings.hud.sector * sector_angle, Settings.hud.depth);
-		glUniform2f(LOC_TEX_AREA, -sector_angle, sector_angle);
+		glUniform3f(Locs.object_pos_polar, 1, Settings.hud.sector * sector_angle, Settings.hud.depth);
+		glUniform2f(Locs.texture_area, -sector_angle, sector_angle);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		SDL_GL_SwapWindow(window);

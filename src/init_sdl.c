@@ -79,13 +79,13 @@ int init_SDL()
 		SDL_Quit();
 		return RET_SDL_ERR;
 	}
-	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3))
+	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2))
 	{
 		report_SDL_error("SDL_GL_SetAttribute");
 		SDL_Quit();
 		return RET_SDL_ERR;
 	}
-	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2))
+	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0))
 	{
 		report_SDL_error("SDL_GL_SetAttribute");
 		SDL_Quit();
