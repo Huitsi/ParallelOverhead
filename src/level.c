@@ -118,7 +118,7 @@ void reset_level()
 }
 
 /**
- * Increse the difficulty of the generated level by an amount defined in the settings.
+ * Increase the difficulty of the generated level by an amount defined in the settings.
  */
 void increase_difficulty()
 {
@@ -172,7 +172,7 @@ int generate_rings(float *colors)
 			}
 			Level.carvers[c] = sector;
 
-			//Merge the last carver into this one if requested (diffculty increase) and possible (sama place)
+			//Merge the last carver into this one if requested (difficulty increase) and possible (same place)
 			if (Level.carvers_to_merge && c != last_carver && Level.carvers[c] == Level.carvers[last_carver])
 			{
 				Level.difficulty.carvers--;

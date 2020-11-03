@@ -149,7 +149,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 		glUniform3f(Locs.object_pos_polar, 0, 0, -ship_ring);
 		glUniform2f(Locs.texture_area, FULL_ANGLE,  Settings.game.rings);
-		glDrawArrays(GL_TRIANGLE_STRIP, 4, 4+1+3*Settings.game.sectors);
+		glDrawArrays(GL_TRIANGLE_STRIP, 4, (2*Settings.game.sectors + 2));
 
 		//Update and render ships
 		glBindTexture(GL_TEXTURE_2D, ship_texture);

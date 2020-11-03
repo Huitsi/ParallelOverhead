@@ -15,8 +15,8 @@ int init_game(SDL_Window *window)
 
 	//Ship vertices
 	vertices[0] = 1;
+	vertices[1] = 0;
 	vertices[2] = 0;
-	vertices[3] = 0;
 
 	vertices[3] = 1;
 	vertices[4] = 0;
