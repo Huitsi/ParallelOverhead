@@ -81,7 +81,11 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 					glUniform2f(Locs.screen_wh, w, h);
 					glViewport(0,0,w,h);
 					break;
-				case SDL_KEYUP:
+				case SDL_KEYDOWN:
+					if (e.key.repeat)
+					{
+						break;
+					}
 					switch (e.key.keysym.sym)
 					{
 						case SDLK_RIGHT:
