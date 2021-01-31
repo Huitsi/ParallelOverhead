@@ -18,7 +18,7 @@ void report_SDL_error(char *context)
  */
 void load_window_size()
 {
-	FILE *f = fopen("window.dat","r");
+	FILE *f = fopen(Settings.paths.config_file,"r");
 	if (f == NULL)
 	{
 		return;
@@ -50,7 +50,7 @@ void save_window_size(SDL_Window *window)
 	SDL_GetWindowPosition(window, &x, &y);
 	SDL_GetWindowSize(window, &w, &h);
 
-	FILE *f = fopen("window.dat","w");
+	FILE *f = fopen(Settings.paths.config_file,"w");
 	if (f == NULL)
 	{
 		return;
@@ -71,6 +71,22 @@ int init_SDL()
 		report_SDL_error("SDL_Init");
 		SDL_Quit();
 		return RET_SDL_ERR;
+	}
+
+	if (!Settings.paths.data_dir[0])
+	{
+		char *base = SDL_GetBasePath();
+		snprintf(Settings.paths.data_dir, PATH_MAX, "%s../share/parallel_overhead/", base);
+		free(base);
+		Settings.paths.data_dir_len = strlen(Settings.paths.data_dir);
+	}
+
+	if (!Settings.paths.config_file[0])
+	{
+		char *pref = SDL_GetPrefPath("Huitsi", "ParallelOverhead");
+		snprintf(Settings.paths.config_file, PATH_MAX, "%spo_settings.dat", pref);
+		free(pref);
+		Settings.paths.config_file_len = strlen(Settings.paths.config_file);
 	}
 
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES))

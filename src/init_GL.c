@@ -174,7 +174,13 @@ Locs;
  */
 int init_GL(SDL_Window *window)
 {
-	GLuint program = make_program("data/vertex.glsl", "data/fragment.glsl");
+	char vertex_path[Settings.paths.data_dir_len + sizeof "vertex.glsl"];
+	snprintf(vertex_path, sizeof vertex_path, "%s%s", Settings.paths.data_dir, "vertex.glsl");
+
+	char fragment_path[Settings.paths.data_dir_len + sizeof "fragment.glsl"];
+	snprintf(fragment_path, sizeof fragment_path, "%s%s", Settings.paths.data_dir, "fragment.glsl");
+
+	GLuint program = make_program(vertex_path, fragment_path);
 	if(!program)
 	{
 		return RET_GL_ERR;

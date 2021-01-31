@@ -132,7 +132,10 @@ void init_hud()
 		return;
 	}
 
-	HUD.surface = SDL_LoadBMP("data/nums.bmp");
+	char nums_path[Settings.paths.data_dir_len + sizeof "nums.bmp"];
+	snprintf(nums_path, sizeof nums_path, "%s%s", Settings.paths.data_dir, "nums.bmp");
+
+	HUD.surface = SDL_LoadBMP(nums_path);
 	if (!HUD.surface)
 	{
 		report_SDL_error("Loading data/nums.bmp");

@@ -5,6 +5,7 @@
 
 struct settings Settings =
 {
+	.paths = {.data_dir_len = 0, .config_file_len = 0},
 	.window = {SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 480, 480},
 	.game =
 	{

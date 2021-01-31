@@ -1,29 +1,44 @@
 #Copyright © 2020 Linus Vanas <linus@vanas.fi>
 #SPDX-License-Identifier: MIT
 
+prefix = ./local
+bindir = $(prefix)/games
+datadir = $(prefix)/share
+
+CFLAGS = -Wall -O3
+
 C = $(wildcard src/*.c)
-H = $(wildcard src/*.h)
 O = $(patsubst src/%.c, tmp/%.o, $C)
-D = $(patsubst src/%.c, tmp/%.dbg.o, $C)
 
-.PHONY: all clean
-
-po.debug: $D
-	gcc -lSDL2 -lGLESv2 -lm $^ -o $@
-
-parallel_overhead: $O
-	gcc -lSDL2 -lGLESv2 -lm $^ -o $@
-
-$O: tmp/%.o: src/%.c $H | tmp
-	gcc -O3 -Wall -c $< -o $@
-
-$D: tmp/%.dbg.o: src/%.c $H | tmp
-	gcc -ggdb -Wall -c $< -o $@
-
-tmp:
-	mkdir tmp
+.PHONY: all clean install uninstall
 
 all: parallel_overhead
 
 clean:
-	rm -fr parallel_overhead po.debug tmp
+	rm -fr parallel_overhead tmp
+
+install: parallel_overhead
+	install -D -t$(DESTDIR)$(bindir) parallel_overhead
+	find data -type f |\
+	 xargs install -m644 -D -t$(DESTDIR)$(datadir)/parallel_overhead
+
+uninstall:
+	rm -f $(DESTDIR)$(bindir)/parallel_overhead
+	rm -fr $(DESTDIR)$(datadir)/parallel_overhead
+
+parallel_overhead: $O
+	$(CC) $(LDFLAGS) -lSDL2 -lGLESv2 -lm $^ -o $@
+
+tmp:
+	mkdir tmp
+
+tmp/o.makefile: $C | tmp
+	echo -n > $@
+	for f in $^;\
+	 do echo -n 'tmp/' >> $@;\
+	 $(CC) -MM $$f >> $@;\
+	 echo '	$$(CC) $$(CPPFLAGS) $$(CFLAGS) -c $$< -o $$@' >> $@;\
+	 echo >> $@;\
+	done
+
+include tmp/o.makefile

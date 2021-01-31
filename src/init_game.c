@@ -61,7 +61,10 @@ int init_game(SDL_Window *window)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
-	SDL_Surface *ship_surface = SDL_LoadBMP("data/ship.bmp");
+	char ship_path[Settings.paths.data_dir_len + sizeof "ship.bmp"];
+	snprintf(ship_path, sizeof ship_path, "%s%s", Settings.paths.data_dir, "ship.bmp");
+
+	SDL_Surface *ship_surface = SDL_LoadBMP(ship_path);
 	if (!ship_surface)
 	{
 		report_SDL_error("Loading data/ship.bmp");

@@ -7,6 +7,8 @@
 #include <SDL2/SDL.h>
 #include <GLES2/gl2.h>
 
+#define PATH_MAX 4096
+
 enum
 {
 	RET_NO_ERR,
@@ -17,6 +19,13 @@ enum
 //Global struct for holding various parameters
 struct settings
 {
+	struct
+	{
+		char data_dir[PATH_MAX], config_file[PATH_MAX];
+		size_t data_dir_len, config_file_len;
+	}
+	paths;
+
 	struct {char mute:1, quiet:1, hide_counters:1, fixed_seed:1; unsigned int seed;} options;
 
 	struct {int x, y, w, h;} window;

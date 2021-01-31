@@ -33,8 +33,11 @@ AudioData;
  */
 struct audio load_wav(const char* file)
 {
+	char path[Settings.paths.data_dir_len + strlen(file) + 1];
+	snprintf(path, sizeof path, "%s%s", Settings.paths.data_dir, file);
+
 	struct audio audio;
-	if (SDL_LoadWAV(file, &audio.spec, &audio.buffer, &audio.length) == NULL)
+	if (SDL_LoadWAV(path, &audio.spec, &audio.buffer, &audio.length) == NULL)
 	{
 		report_SDL_error("loading wav");
 	}
@@ -65,9 +68,9 @@ void init_audio()
 		return;
 	}
 
-	AudioData.music = load_wav("data/fast_pulse.wav");
-	AudioData.move = load_wav("data/move.wav");
-	AudioData.death = load_wav("data/death.wav");
+	AudioData.music = load_wav("fast_pulse.wav");
+	AudioData.move = load_wav("move.wav");
+	AudioData.death = load_wav("death.wav");
 
 	SDL_AudioSpec obt;
 
