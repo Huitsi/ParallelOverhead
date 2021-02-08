@@ -10,6 +10,12 @@ CFLAGS = -Wall -O3
 C = $(wildcard src/*.c)
 O = $(patsubst src/%.c, tmp/%.o, $C)
 
+version := $(shell git describe --tags)
+
+ifdef version
+	VERSION = -DVERSION=\"$(version)\"
+endif
+
 .PHONY: all clean install uninstall
 
 all: parallel_overhead
@@ -37,7 +43,7 @@ tmp/o.makefile: $C | tmp
 	for f in $^;\
 	 do echo -n 'tmp/' >> $@;\
 	 $(CC) -MM $$f >> $@;\
-	 echo '	$$(CC) $$(CPPFLAGS) $$(CFLAGS) -c $$< -o $$@' >> $@;\
+	 echo '	$$(CC) $$(CPPFLAGS) $$(CFLAGS) $(VERSION) -c $$< -o $$@' >> $@;\
 	 echo >> $@;\
 	done
 
