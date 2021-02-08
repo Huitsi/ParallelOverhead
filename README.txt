@@ -14,10 +14,11 @@ https://huitsi.net/games/parallel-overhead/
 
 Playing the game
 ----------------
-The executable binary for GNU/Linux systems is called parallel_overhead.
 Parallel Overhead requires the SDL2-library to be installed in the system as
-well as GLES 2.0 support. Parallel overhead has a few command line options, run
-'./parallel_overhead --help' to find out more about them.
+well as GLES 2.0 support. The parallel_overhead executable binary is located in
+the 'games'-subdirectory of the installation directory. Parallel overhead has a
+few command line options, run the game with the '--help'-option to find out
+more about them.
 
 Keep the ships from falling through the holes! The ships can be rotated
 clockwise with the left arrow key and anticlockwise with the right arrow key.
@@ -38,4 +39,7 @@ have initialized it with 'git lfs install' before cloning.
 
 Building Parallel Overhead is tested on Debian Buster. The required packages
 are build-essential and libsdl2-dev. With those installed Parallel Overhead can
-be simply built with 'make parallel_overhead'.
+be simply built with 'make install'. The default installation location is just
+a local 'local'-directory, so no root privileges are required. I you wish to
+properly install Parallel overhead into your system, run (for example)
+'make install prefix=/usr/local'.
