@@ -33,7 +33,7 @@ uninstall:
 	rm -fr $(DESTDIR)$(datadir)/parallel_overhead
 
 parallel_overhead: $O
-	$(CC) $(LDFLAGS) -lSDL2 -lGLESv2 -lm $^ -o $@
+	$(CC) $(LDFLAGS) $^ -lSDL2 -lGLESv2 -lm -o $@
 
 tmp:
 	mkdir tmp

@@ -7,4 +7,4 @@ void free_level();
 void reset_level();
 void increase_difficulty();
 
-int generate_rings(float *colors);
+int generate_rings(unsigned char *colors);

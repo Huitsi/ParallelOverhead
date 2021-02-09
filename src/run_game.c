@@ -31,7 +31,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 	//Wall texture
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
-	float wall_texture_data[(Settings.game.rings + Settings.game.color_transitions.max) * Settings.game.sectors * 4];
+	unsigned char wall_texture_data[(Settings.game.rings + Settings.game.color_transitions.max) * Settings.game.sectors * 4];
 	int rings_generated = generate_rings(wall_texture_data);
 	while (rings_generated < Settings.game.rings)
 	{
@@ -40,7 +40,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 			&wall_texture_data[rings_generated * Settings.game.sectors * 4]
 		);
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_UNSIGNED_BYTE, wall_texture_data);
 
 	float ship_ring = 0;
 	unsigned int last_tick_time = 0;
@@ -148,7 +148,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 				);
 			}
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_FLOAT, wall_texture_data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_UNSIGNED_BYTE, wall_texture_data);
 		}
 
 		glUniform3f(Locs.object_pos_polar, 0, 0, -ship_ring);

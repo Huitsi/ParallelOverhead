@@ -4,9 +4,13 @@
 #include <time.h>
 #include "common.h"
 
+#define COLOR_CHANNEL_MIN 0
+#define COLOR_CHANNEL_MAX 255
+typedef unsigned char COLOR_CHANNEL;
+
 struct
 {
-	float previous_color[3];
+	COLOR_CHANNEL previous_color[3];
 	unsigned char *carvers, *safe_path, carvers_to_merge;
 	struct
 	{
@@ -41,17 +45,22 @@ int rani(int min, int max)
 	return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
 
+COLOR_CHANNEL rancc()
+{
+	return rani(COLOR_CHANNEL_MIN, COLOR_CHANNEL_MAX);
+}
+
 /**
- * Shuffle an array of floats.
+ * Shuffle an array of color channels.
  * @param array The array to shuffle
  * @param len The length of the array
  */
-void shufflef(float *array, int len)
+void shufflecc(COLOR_CHANNEL *array, int len)
 {
 	for (int i = 0; i < len; i++)
 	{
 		int j = rani(0,i);
-		float tmp = array[i];
+		COLOR_CHANNEL tmp = array[i];
 		array[i] = array[j];
 		array[j] = tmp;
 	}
@@ -59,14 +68,14 @@ void shufflef(float *array, int len)
 
 /**
  * Generate a random bright color.
- * @param color The 3-cell float array to store the generated color in.
+ * @param color The 3-cell byte array to store the generated color in.
  */
-void generate_color(float *color)
+void generate_color(COLOR_CHANNEL *color)
 {
-	color[0] = 0;
-	color[1] = 1;
-	color[2] = ranf();
-	shufflef(color, 3);
+	color[0] = COLOR_CHANNEL_MIN;
+	color[1] = COLOR_CHANNEL_MAX;
+	color[2] = rancc();
+	shufflecc(color, 3);
 }
 
 /**
@@ -133,23 +142,23 @@ void increase_difficulty()
  * @param colors The texture array to add the rings to
  * @return The amount of rings added
  */
-int generate_rings(float *colors)
+int generate_rings(COLOR_CHANNEL *colors)
 {
 	int last_carver = Level.difficulty.carvers - 1;
 	int sectors_per_ship = (Settings.game.sectors / Settings.game.ships);
 
 	int length = rani(Settings.game.color_transitions.min, Settings.game.color_transitions.max);
 
-	float color[3];
-	memcpy(color, Level.previous_color, 3*sizeof(float));
+	COLOR_CHANNEL color[3];
+	memcpy(color, Level.previous_color, 3*sizeof(COLOR_CHANNEL));
 
-	float next_color[3];
+	COLOR_CHANNEL next_color[3];
 	generate_color(next_color);
-	memcpy(Level.previous_color, next_color, 3*sizeof(float));
+	memcpy(Level.previous_color, next_color, 3*sizeof(COLOR_CHANNEL));
 
-	float rstep = (next_color[0] - color[0]) / length;
-	float gstep = (next_color[1] - color[1]) / length;
-	float bstep = (next_color[2] - color[2]) / length;
+	COLOR_CHANNEL rstep = (next_color[0] - color[0]) / length;
+	COLOR_CHANNEL gstep = (next_color[1] - color[1]) / length;
+	COLOR_CHANNEL bstep = (next_color[2] - color[2]) / length;
 
 	//For each generated ring
 	for (int r = 0; r < length; r++)
@@ -190,7 +199,7 @@ int generate_rings(float *colors)
 			colors[pos + 0] = color[0];
 			colors[pos + 1] = color[1];
 			colors[pos + 2] = color[2];
-			colors[pos + 3] = ranfi(0.6,1);
+			colors[pos + 3] = rani(153,255);
 
 			if (Level.safe_path[s])
 			{
