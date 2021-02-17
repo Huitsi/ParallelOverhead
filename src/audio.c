@@ -63,7 +63,7 @@ void loop_music(void *userdata, unsigned char *stream, int len)
  */
 void init_audio()
 {
-	if (Settings.options.mute)
+	if (Settings.flags.mute)
 	{
 		return;
 	}
@@ -98,7 +98,7 @@ void init_audio()
  */
 void free_audio()
 {
-	if (Settings.options.mute)
+	if (Settings.flags.mute)
 	{
 		return;
 	}
@@ -128,7 +128,7 @@ void reset_music()
 
 void play_move_sound()
 {
-	if (Settings.options.mute)
+	if (Settings.flags.mute)
 	{
 		return;
 	}
@@ -147,7 +147,7 @@ void play_move_sound()
 
 void play_death_sound()
 {
-	if (Settings.options.mute)
+	if (Settings.flags.mute)
 	{
 		return;
 	}

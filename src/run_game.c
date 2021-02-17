@@ -49,7 +49,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 	char paused = 1;
 	int ships_alive = Settings.game.ships;
 
-	if (!Settings.options.quiet)
+	if (!Settings.flags.quiet)
 	{
 		printf("Starting a new run.\n");
 	}
@@ -181,7 +181,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 					ships[i].alive = 0;
 					increase_difficulty();
 					play_death_sound();
-					if (!Settings.options.quiet)
+					if (!Settings.flags.quiet)
 					{
 						printf("Ship lost after %.3f s (a distance of %u rings).\n", time_survived/1000., rings_survived);
 					}

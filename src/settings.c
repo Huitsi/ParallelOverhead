@@ -21,6 +21,21 @@ struct settings Settings =
 	.tick_time = {16, 24}
 };
 
+void set_setting(char *setting, char *value)
+{
+	if (!strcmp("seed", setting))
+	{
+		unsigned int seed;
+		if (sscanf(value, "%ud", &seed))
+		{
+			Settings.game.seed = seed;
+			return;
+		}
+		fprintf(stderr, "Invalid seed: %s\n", value);
+		return;
+	}
+}
+
 /**
  * Load game parameter overrides from the given file.
  * @param file The path of the override file.

@@ -17,43 +17,69 @@
  */
 int main(int argc, char **argv)
 {
-	int print_version = 0;
-	int print_help = 0;
+	char print_version = 0;
+	char print_help = 0;
+	char print_settings = 0;
+
 	for (int i = 1; i < argc; i++)
 	{
-		if (!strcmp("--seed", argv[i]))
+		if(!strcmp("--version", argv[i]))
 		{
-			Settings.options.fixed_seed = 1;
-			if (++i >= argc)
-			{
-				Settings.options.fixed_seed = 0;
-				fprintf(stderr, "No seed provided\n");
-				break;
-			}
-			else if (!sscanf(argv[i], "%u", &Settings.options.seed))
-			{
-				Settings.options.fixed_seed = 0;
-				fprintf(stderr, "Invalid seed: %s\n", argv[i]);
-			}
+			print_version = 1;
 			continue;
 		}
 
-		if (!strcmp("--override-params", argv[i]))
+		if (!strcmp("--help", argv[i]))
 		{
-			if (++i >= argc)
-			{
-				fprintf(stderr, "No file provided\n");
-				break;
-			}
-			override_params(argv[i]);
+			print_help = 1;
 			continue;
 		}
 
-		print_version = print_version || !strcmp("--version", argv[i]);
-		print_help = print_help || !strcmp("--help", argv[i]);
-		Settings.options.mute = Settings.options.mute || !strcmp("--mute", argv[i]);
-		Settings.options.quiet = Settings.options.quiet || !strcmp("--quiet", argv[i]);
-		Settings.options.hide_counters = Settings.options.hide_counters || !strcmp("--hide-counters", argv[i]);
+		if (!strcmp("--help-settings", argv[i]))
+		{
+			print_settings = 1;
+			continue;
+		}
+
+		if (!strcmp("--mute", argv[i]))
+		{
+			Settings.flags.mute = 1;
+			continue;
+		}
+
+		if (!strcmp("--quiet", argv[i]))
+		{
+			Settings.flags.quiet = 1;
+			continue;
+		}
+
+		if (!strcmp("--mute", argv[i]))
+		{
+			Settings.flags.mute = 1;
+			continue;
+		}
+
+		if (!strcmp("--hide-counters", argv[i]))
+		{
+			Settings.flags.hide_counters = 1;
+			continue;
+		}
+
+		if (!strcmp("--disable-config-file", argv[i]))
+		{
+			Settings.flags.disable_config_file = 1;
+			continue;
+		}
+
+		int len = strlen(argv[i]);
+		char setting[255], value[len];
+		if (sscanf(argv[i], "--%255[^=]=%s", setting, value) == 2)
+		{
+			set_setting(setting, value);
+			continue;
+		}
+
+		fprintf(stderr, "Unrecognized option: %s\n", argv[i]);
 	}
 
 	if (print_version)
@@ -66,15 +92,29 @@ int main(int argc, char **argv)
 		printf("An endless runner game.\n");
 		printf("Usage: %s [options]\n", argv[0]);
 		printf("Options:\n");
-		printf(" --help                   Print this help and exit.\n");
-		printf(" --version                Print the version number and exit.\n");
-		printf(" --mute                   Do not play any audio.\n");
-		printf(" --quiet                  Do not print results into standard output.\n");
-		printf(" --hide-counters          Do not display time and distance counters.\n");
-		printf(" --seed <seed>            Set the level generator seed to <seed>, a non-negative integer.\n");
-		printf(" --override-params <file> Override the game parameters with the ones from <file>.\n");
+		printf(" --help                Print this help and exit.\n");
+		printf(" --version             Print the version number and exit.\n");
+		printf(" --quiet               Do not print results into standard output.\n");
+		printf(" --mute                Do not play any audio.\n");
+		printf(" --hide-counters       Do not display time and distance counters.\n");
+		printf(" --disable-config-file Do not read from or write to the config file.\n");
+		printf(" --<setting>=<value>   Set <setting> to <value> (see below).\n");
+		printf(" --help-settings       List available settings (see above) and exit.\n");
+
 	}
-	if (print_version || print_help)
+
+	if (print_settings)
+	{
+		printf
+		(
+			"Settings:\n"
+			" seed (integer) A seed to use for generating the level.\n"
+			"       Unless 0, the seed is reset to this value for each run.\n"
+			"       When 0 (default), a random (time-based) seed is chosen.\n"
+		);
+	}
+
+	if (print_version || print_help || print_settings)
 	{
 		return 0;
 	}

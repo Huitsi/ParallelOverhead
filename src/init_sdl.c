@@ -81,7 +81,7 @@ int init_SDL()
 		Settings.paths.data_dir_len = strlen(Settings.paths.data_dir);
 	}
 
-	if (!Settings.paths.config_file[0])
+	if (!Settings.flags.disable_config_file && !Settings.paths.config_file[0])
 	{
 		char *pref = SDL_GetPrefPath("Huitsi", "ParallelOverhead");
 		snprintf(Settings.paths.config_file, PATH_MAX, "%spo_settings.dat", pref);
@@ -108,7 +108,10 @@ int init_SDL()
 		return RET_SDL_ERR;
 	}
 
-	load_window_size();
+	if (!Settings.flags.disable_config_file)
+	{
+		load_window_size();
+	}
 
 	SDL_Window *window =  SDL_CreateWindow
 	(
@@ -140,7 +143,10 @@ int init_SDL()
 
 	int ret = init_GL(window);
 
-	save_window_size(window);
+	if (!Settings.flags.disable_config_file)
+	{
+		save_window_size(window);
+	}
 
 	free_audio();
 

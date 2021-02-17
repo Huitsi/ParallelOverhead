@@ -109,7 +109,7 @@ void render_distance(SDL_Surface *target, SDL_Rect rect, unsigned int distance)
  */
 void render_time_and_distance(SDL_Surface *target, unsigned int time_ms, unsigned int distance)
 {
-	if (Settings.options.hide_counters)
+	if (Settings.flags.hide_counters)
 	{
 		return;
 	}
@@ -127,7 +127,7 @@ void render_time_and_distance(SDL_Surface *target, unsigned int time_ms, unsigne
  */
 void init_hud()
 {
-	if (Settings.options.hide_counters)
+	if (Settings.flags.hide_counters)
 	{
 		return;
 	}
@@ -159,7 +159,7 @@ void init_hud()
  */
 void free_hud()
 {
-	if (Settings.options.hide_counters)
+	if (Settings.flags.hide_counters)
 	{
 		return;
 	}

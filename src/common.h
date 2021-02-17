@@ -26,7 +26,7 @@ struct settings
 	}
 	paths;
 
-	struct {char mute:1, quiet:1, hide_counters:1, fixed_seed:1; unsigned int seed;} options;
+	struct {char mute:1, quiet:1, hide_counters:1, disable_config_file:1;} flags;
 
 	struct {int x, y, w, h;} window;
 
@@ -34,6 +34,7 @@ struct settings
 	{
 		unsigned char rings, sectors, ships, ship_depth, start_sector;
 		struct {unsigned char min, max;} color_transitions;
+		unsigned int seed;
 	}
 	game;
 
@@ -60,6 +61,7 @@ int init_GL(SDL_Window *window);
 int init_game(SDL_Window *window);
 int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surface *timer_surface);
 
+void set_setting(char *setting, char *value);
 void override_params(char *file);
 
 void init_audio();

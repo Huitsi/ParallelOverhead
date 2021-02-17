@@ -102,9 +102,9 @@ void free_level()
  */
 void reset_level()
 {
-	if (Settings.options.fixed_seed)
+	if (Settings.game.seed)
 	{
-		srand(Settings.options.seed);
+		srand(Settings.game.seed);
 	}
 
 	generate_color(Level.previous_color);
