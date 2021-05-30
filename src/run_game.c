@@ -12,7 +12,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 	GLuint ship_texture = textures[0];
 	GLuint wall_texture = textures[1];
 	GLuint timer_texture = textures[2];
-	const float sector_angle = FULL_ANGLE/Settings.game.sectors;
+	const float sector_angle = FULL_ANGLE/Settings.tunnel.sectors;
 
 	reset_level();
 	reset_music();
@@ -22,32 +22,32 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		int alive;
 		int sector;
 	}
-	ships[Settings.game.ships];
-	for (int i = 0; i < Settings.game.ships; i++)
+	ships[Settings.ships.amount];
+	for (int i = 0; i < Settings.ships.amount; i++)
 	{
 		ships[i].alive = 1;
-		ships[i].sector = Settings.game.start_sector + i * (Settings.game.sectors / Settings.game.ships);
+		ships[i].sector = Settings.ships.sector_offset + i * (Settings.tunnel.sectors / Settings.ships.amount);
 	}
 
 	//Wall texture
 	glBindTexture(GL_TEXTURE_2D, wall_texture);
-	unsigned char wall_texture_data[(Settings.game.rings + Settings.game.color_transitions.max) * Settings.game.sectors * 4];
+	unsigned char wall_texture_data[(Settings.tunnel.length + Settings.tunnel.color_transition_length.max) * Settings.tunnel.sectors * 4];
 	int rings_generated = generate_rings(wall_texture_data);
-	while (rings_generated < Settings.game.rings)
+	while (rings_generated < Settings.tunnel.length)
 	{
 		rings_generated += generate_rings
 		(
-			&wall_texture_data[rings_generated * Settings.game.sectors * 4]
+			&wall_texture_data[rings_generated * Settings.tunnel.sectors * 4]
 		);
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_UNSIGNED_BYTE, wall_texture_data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.tunnel.sectors, Settings.tunnel.length, 0, GL_RGBA, GL_UNSIGNED_BYTE, wall_texture_data);
 
-	float ship_ring = 0;
+	float ship_pos = 0;
 	unsigned int last_tick_time = 0;
 	unsigned int time_survived = 0;
 	unsigned int rings_survived = 0;
 	char paused = 1;
-	int ships_alive = Settings.game.ships;
+	int ships_alive = Settings.ships.amount;
 
 	if (!Settings.flags.quiet)
 	{
@@ -120,7 +120,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		else
 		{
 			time_survived += last_tick_time;
-			ship_ring += last_tick_time*speed;
+			ship_pos += last_tick_time*speed;
 			pause_music(0);
 		}
 
@@ -128,32 +128,32 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 		//Update and render walls
 		glBindTexture(GL_TEXTURE_2D, wall_texture);
-		while(ship_ring > 1)
+		while(ship_pos > Settings.tunnel.section_length)
 		{
 			memmove
 			(
 				wall_texture_data,
-				&wall_texture_data[Settings.game.sectors * 4],
-				sizeof(wall_texture_data) - Settings.game.sectors*4*sizeof(float)
+				&wall_texture_data[Settings.tunnel.sectors * 4],
+				sizeof(wall_texture_data) - Settings.tunnel.sectors*4*sizeof(float)
 			);
 			rings_generated--;
-			ship_ring--;
+			ship_pos -= Settings.tunnel.section_length;
 			rings_survived++;
 
-			while (rings_generated < Settings.game.rings)
+			while (rings_generated < Settings.tunnel.length)
 			{
 				rings_generated += generate_rings
 				(
-					&wall_texture_data[rings_generated * Settings.game.sectors * 4]
+					&wall_texture_data[rings_generated * Settings.tunnel.sectors * 4]
 				);
 			}
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.game.sectors, Settings.game.rings, 0, GL_RGBA, GL_UNSIGNED_BYTE, wall_texture_data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Settings.tunnel.sectors, Settings.tunnel.length, 0, GL_RGBA, GL_UNSIGNED_BYTE, wall_texture_data);
 		}
 
-		glUniform3f(Locs.object_pos_polar, 0, 0, -ship_ring);
-		glUniform2f(Locs.texture_area, FULL_ANGLE,  Settings.game.rings);
-		glDrawArrays(GL_TRIANGLE_STRIP, 4, (2*Settings.game.sectors + 2));
+		glUniform3f(Locs.object_pos_polar, 0, 0, -ship_pos);
+		glUniform2f(Locs.texture_area, FULL_ANGLE,  Settings.tunnel.length * Settings.tunnel.section_length);
+		glDrawArrays(GL_TRIANGLE_STRIP, 4, (2*Settings.tunnel.sectors + 2));
 
 		//Update and render ships
 		glBindTexture(GL_TEXTURE_2D, ship_texture);
@@ -165,18 +165,18 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 		}
 
 		ships_alive = 0;
-		for (int i = 0; i < Settings.game.ships; i++)
+		for (int i = 0; i < Settings.ships.amount; i++)
 		{
 			if (ships[i].alive)
 			{
 				ships[i].sector += ship_sector_delta;
-				ships[i].sector %= Settings.game.sectors;
+				ships[i].sector %= Settings.tunnel.sectors;
 				if (ships[i].sector < 0)
 				{
-					ships[i].sector += Settings.game.sectors;
+					ships[i].sector += Settings.tunnel.sectors;
 				}
 
-				if (!wall_texture_data[Settings.game.sectors*4*Settings.game.ship_depth + ships[i].sector*4 + 3])
+				if (!wall_texture_data[Settings.tunnel.sectors*4*Settings.ships.depth + ships[i].sector*4 + 3])
 				{
 					ships[i].alive = 0;
 					increase_difficulty();
@@ -190,7 +190,7 @@ int run_game(SDL_Window *window, GLfloat vertices[], GLuint textures[], SDL_Surf
 
 				ships_alive++;
 
-				glUniform3f(Locs.object_pos_polar, 0, ships[i].sector * sector_angle, Settings.game.ship_depth);
+				glUniform3f(Locs.object_pos_polar, 0, ships[i].sector * sector_angle, Settings.ships.depth * Settings.tunnel.section_length);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			}
 		}

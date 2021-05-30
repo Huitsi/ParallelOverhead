@@ -10,8 +10,8 @@
 
 int init_game(SDL_Window *window)
 {
-	float sector_angle = FULL_ANGLE/Settings.game.sectors;
-	GLfloat vertices[(4 + 2*Settings.game.sectors + 2)*3];
+	float sector_angle = FULL_ANGLE/Settings.tunnel.sectors;
+	GLfloat vertices[(4 + 2*Settings.tunnel.sectors + 2)*3];
 
 	//Ship vertices
 	vertices[0] = 1;
@@ -31,7 +31,7 @@ int init_game(SDL_Window *window)
 	vertices[11] = sector_angle;
 
 	//Wall vertices
-	for (int i = 0; i <= Settings.game.sectors; i++)
+	for (int i = 0; i <= Settings.tunnel.sectors; i++)
 	{
 		int pos = 12 + i * 6;
 		float angle = i * sector_angle;
@@ -41,7 +41,7 @@ int init_game(SDL_Window *window)
 		vertices[pos + 2] = 0;
 		vertices[pos + 3] = 1;
 		vertices[pos + 4] = angle;
-		vertices[pos + 5] = Settings.game.rings;
+		vertices[pos + 5] = Settings.tunnel.length * Settings.tunnel.section_length;
 	}
 
 	GLuint vertex_buffer;

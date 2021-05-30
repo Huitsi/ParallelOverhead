@@ -85,7 +85,7 @@ void init_level()
 {
 	srand(time(NULL));
 	Level.carvers = malloc(Settings.difficulty.carvers);
-	Level.safe_path = malloc(Settings.game.sectors);
+	Level.safe_path = malloc(Settings.tunnel.sectors);
 }
 
 /**
@@ -111,7 +111,7 @@ void reset_level()
 
 	for (int i = 0; i < Settings.difficulty.carvers; i++)
 	{
-		Level.carvers[i] = rani(0, (Settings.game.sectors / Settings.game.ships) - 1);
+		Level.carvers[i] = rani(0, (Settings.tunnel.sectors / Settings.ships.amount) - 1);
 	}
 
 	Level.carvers_to_merge = 0;
@@ -120,7 +120,7 @@ void reset_level()
 	Level.difficulty.uncarved_safe_chance = Settings.difficulty.uncarved_safe_chance;
 	Level.difficulty.transition_length = Settings.difficulty.transition_length;
 
-	for (int i = 0; i < Settings.game.sectors; i++)
+	for (int i = 0; i < Settings.tunnel.sectors; i++)
 	{
 		Level.safe_path[i] = Level.difficulty.transition_length;
 	}
@@ -145,9 +145,9 @@ void increase_difficulty()
 int generate_rings(COLOR_CHANNEL *colors)
 {
 	int last_carver = Level.difficulty.carvers - 1;
-	int sectors_per_ship = (Settings.game.sectors / Settings.game.ships);
+	int sectors_per_ship = (Settings.tunnel.sectors / Settings.ships.amount);
 
-	int length = rani(Settings.game.color_transitions.min, Settings.game.color_transitions.max);
+	int length = rani(Settings.tunnel.color_transition_length.min, Settings.tunnel.color_transition_length.max);
 
 	COLOR_CHANNEL color[3];
 	memcpy(color, Level.previous_color, 3*sizeof(COLOR_CHANNEL));
@@ -167,7 +167,7 @@ int generate_rings(COLOR_CHANNEL *colors)
 		for (int c = 0; c < Level.difficulty.carvers; c++)
 		{
 			//Carve a safe path
-			for (int s = 0; s < Settings.game.ships; s++)
+			for (int s = 0; s < Settings.ships.amount; s++)
 			{
 				int sector = Level.carvers[c] + s * sectors_per_ship;
 				Level.safe_path[sector] = Level.difficulty.transition_length + 1;
@@ -192,9 +192,9 @@ int generate_rings(COLOR_CHANNEL *colors)
 		color[0] += rstep;
 		color[1] += gstep;
 		color[2] += bstep;
-		for (int s = 0; s < Settings.game.sectors; s++)
+		for (int s = 0; s < Settings.tunnel.sectors; s++)
 		{
-			int pos = (r * Settings.game.sectors + s) * 4;
+			int pos = (r * Settings.tunnel.sectors + s) * 4;
 
 			colors[pos + 0] = color[0];
 			colors[pos + 1] = color[1];

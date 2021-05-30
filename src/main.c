@@ -108,9 +108,16 @@ int main(int argc, char **argv)
 		printf
 		(
 			"Settings:\n"
-			" seed (integer) A seed to use for generating the level.\n"
-			"       Unless 0, the seed is reset to this value for each run.\n"
-			"       When 0 (default), a random (time-based) seed is chosen.\n"
+			" seed - An integer seed to use for generating the level.\n"
+			"  Unless 0, the seed is reset to this value for each run.\n"
+			"  When 0 (default), a random (time-based) seed is chosen.\n"
+			" ships - The amount of ships the game stats with.\n"
+			" ship-depth - The amount of sections inwards from the camera the ships are.\n"
+			" ship-sector-offset - Offset to the starting sectors of the ships.\n"
+			" tunnel-sectors - The amount of sectors the tunnel wall consists of."
+
+			"Also:  tunnel-length tunnel-section-length\n"
+			" in-color-transition-length max-color-transition-length\n"
 		);
 	}
 

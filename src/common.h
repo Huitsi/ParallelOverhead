@@ -32,11 +32,19 @@ struct settings
 
 	struct
 	{
-		unsigned char rings, sectors, ships, ship_depth, start_sector;
-		struct {unsigned char min, max;} color_transitions;
-		unsigned int seed;
+		unsigned char length, sectors;
+		float section_length;
+		struct {unsigned char min, max;} color_transition_length;
 	}
-	game;
+	tunnel;
+
+	struct
+	{
+		unsigned char amount, depth, sector_offset;
+	}
+	ships;
+
+	struct {unsigned int seed;} game;
 
 	struct
 	{

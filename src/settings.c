@@ -7,10 +7,14 @@ struct settings Settings =
 {
 	.paths = {.data_dir_len = 0, .config_file_len = 0},
 	.window = {SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 480, 480},
-	.game =
+	.tunnel =
 	{
-		.rings = 100, .sectors = 10, .ships = 2, .ship_depth = 1, .start_sector = 2,
-		.color_transitions = {12, 60}
+		.length = 255, .sectors = 10, .section_length = 1.0,
+		.color_transition_length = {12, 60}
+	},
+	.ships =
+	{
+		.amount = 2, .depth = 1, .sector_offset = 2,
 	},
 	.difficulty =
 	{
@@ -20,6 +24,38 @@ struct settings Settings =
 	.hud = {.sector = 2, .depth = 3},
 	.tick_time = {16, 24}
 };
+
+char try_set_uchar(char *setting_name, unsigned char *setting, char *setting_str,  char *value_str)
+{
+	if (strcmp(setting_name, setting_str))
+	{
+		return 0;
+	}
+	unsigned char value;
+	if (sscanf(value_str, "%hhud", &value))
+	{
+		*setting = value;
+		return 1;
+	}
+	fprintf(stderr, "Invalid %s: %s\n", setting_str, value_str);
+	return 1;
+}
+
+char try_set_float(char *setting_name, float *setting, char *setting_str,  char *value_str)
+{
+	if (strcmp(setting_name, setting_str))
+	{
+		return 0;
+	}
+	float value;
+	if (sscanf(value_str, "%f", &value))
+	{
+		*setting = value;
+		return 1;
+	}
+	fprintf(stderr, "Invalid %s: %s\n", setting_str, value_str);
+	return 1;
+}
 
 void set_setting(char *setting, char *value)
 {
@@ -34,6 +70,18 @@ void set_setting(char *setting, char *value)
 		fprintf(stderr, "Invalid seed: %s\n", value);
 		return;
 	}
+
+	if (try_set_uchar("ships", &(Settings.ships.amount), setting, value)) return;
+	if (try_set_uchar("ship-depth", &(Settings.ships.depth), setting, value)) return;
+	if (try_set_uchar("ship-sector-offset", &(Settings.ships.sector_offset), setting, value)) return;
+
+	if (try_set_uchar("tunnel-sectors", &(Settings.tunnel.sectors), setting, value)) return;
+	if (try_set_uchar("tunnel-length", &(Settings.tunnel.length), setting, value)) return;
+	if (try_set_float("tunnel-section-length", &(Settings.tunnel.section_length), setting, value)) return;
+	if (try_set_uchar("min-color-transition-length", &(Settings.tunnel.color_transition_length.min), setting, value)) return;
+	if (try_set_uchar("max-color-transition-length", &(Settings.tunnel.color_transition_length.max), setting, value)) return;
+
+	fprintf(stderr, "Unrecognized setting: %s\n", setting);
 }
 
 /**
@@ -50,13 +98,6 @@ void override_params(char *file)
 	}
 
 	int sum = 0;
-	sum += fscanf(f, "%hhud", &Settings.game.rings);
-	sum += fscanf(f, "%hhud", &Settings.game.sectors);
-	sum += fscanf(f, "%hhud", &Settings.game.ships);
-	sum += fscanf(f, "%hhud", &Settings.game.ship_depth);
-	sum += fscanf(f, "%hhud", &Settings.game.start_sector);
-	sum += fscanf(f, "%hhud", &Settings.game.color_transitions.min);
-	sum += fscanf(f, "%hhud", &Settings.game.color_transitions.max);
 
 	sum += fscanf(f, "%f", &Settings.difficulty.speed);
 	sum += fscanf(f, "%f", &Settings.difficulty.uncarved_safe_chance);
@@ -73,11 +114,6 @@ void override_params(char *file)
 
 	sum += fscanf(f, "%hhud", &Settings.tick_time.min);
 	sum += fscanf(f, "%hhud", &Settings.tick_time.max);
-
-	if (sum < 19)
-	{
-		fprintf(stderr, "Override file was incomplete or invalid.\n");
-	}
 
 	fclose(f);
 }
