@@ -31,7 +31,7 @@ The game starts paused so that you can resize the window and adjusts the
 Building from source
 --------------------
 The Parallel Overhead source code can be found at:
-https://huitsi.net:61734/Huitsi/ParallelOverhead
+https://codeberg.org/Huitsi/ParallelOverhead
 https://github.com/Huitsi/ParallelOverhead
 
 When cloning with git, git-lfs is needed to get the audio assets. Make sure you
