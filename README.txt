@@ -2,6 +2,7 @@ Parallel Overhead ReadMe
 ------------------------
 Copyright © 2020 Linus Vanas <linus@vanas.fi>
 SPDX-License-Identifier: MIT
+https://huitsi.net/games/parallel-overhead/
 
 WARNING: This game features rapidly changing colors.
 
@@ -10,7 +11,8 @@ ships Truth and Beauty on a groundbreaking trip through hyperspace. A stable
 hyperspace tunnel is finally being achieved with two ships locked to the
 opposite walls of the tunnel. Well, almost stable...
 
-https://huitsi.net/games/parallel-overhead/
+The game features music by oglsdl from
+https://opengameart.org/content/fast-pulse
 
 Playing the game
 ----------------
@@ -35,7 +37,10 @@ https://codeberg.org/Huitsi/ParallelOverhead
 https://github.com/Huitsi/ParallelOverhead
 
 When cloning with git, git-lfs is needed to get the audio assets. Make sure you
-have initialized it with 'git lfs install' before cloning.
+have initialized it with 'git lfs install' before cloning. Alternatively, the
+sound effects can be re-exported from data-src with SFXR. The music can also be
+downloaded from OpenGameArt.org but will need to be converted to .wav.
+(SFXR: https://www.drpetter.se/project_sfxr.html)
 
 Building Parallel Overhead is tested on Debian Buster. The required packages
 are build-essential and libsdl2-dev. With those installed Parallel Overhead can
